@@ -12,10 +12,11 @@ public class Enums
     public enum UnitClass
     {
         None,       // 거점이나 전술 카드를 위해
-        Scout,      // 정찰 (Scout)
-        Assault,    // 공격 (Assault)
-        Logistics   // 보조 (Logistics)
-    }
+    Scout,      // 정찰병
+    Assault,    // 돌격병
+    Logistics   // 보급병
+}
+
     
     // 카드 등급 (별 등급)
     public enum CardRarity

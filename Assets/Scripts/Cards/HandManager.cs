@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class HandManager : MonoBehaviour
 {
+    public static HandManager Instance { get; private set; }
+
     [Header("Assign in Inspector")]
     public UICard uiCardPrefab;
     public Transform handPanelTransform;
@@ -17,11 +19,26 @@ public class HandManager : MonoBehaviour
 
     private List<CardData> gameDeck = new List<CardData>();
 
+    private List<CardData> gameDeckBackup = new List<CardData>();
+
+    void Awake()
+    {
+        // 싱글톤 패턴 설정
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            Instance = this;
+        }
+    }
+
     void Start()
     {
         BuildDeck();
         ShuffleDeck();
-        DrawInitialHand(5);
+        DrawCards(5);
     }
 
     // 덱을 구성하는 함수
@@ -29,12 +46,17 @@ public class HandManager : MonoBehaviour
     {
         gameDeck.Clear();
 
-        // 지정된 카드 에셋들을 덱에 추가
-        gameDeck.Add(reconCard);
-        gameDeck.Add(barrierCard);
-        gameDeck.Add(auroraCard);
-        gameDeck.Add(energyRefillCard);
-        gameDeck.Add(boomCard);
+        for(int i = 0; i < 3; i++)
+        {
+            gameDeck.Add(reconCard);
+            gameDeck.Add(barrierCard);
+            gameDeck.Add(auroraCard);
+            gameDeck.Add(energyRefillCard);
+            gameDeck.Add(boomCard);
+        }
+
+        gameDeckBackup = gameDeck;
+        
     }
 
     // 덱을 섞는 함수 (Fisher-Yates Shuffle)
@@ -50,7 +72,7 @@ public class HandManager : MonoBehaviour
     }
 
     // 지정된 수만큼 카드를 드로우하는 함수
-    void DrawInitialHand(int count)
+    public void DrawCards(int count)
     {
         for (int i = 0; i < count; i++)
         {
@@ -64,6 +86,13 @@ public class HandManager : MonoBehaviour
                 UICard newCard = Instantiate(uiCardPrefab, handPanelTransform);
                 newCard.Initialize(drawnCard);
             }
+            else
+            {
+                gameDeck = gameDeckBackup;
+                ShuffleDeck();
+                i--; // 덱이 비었을 때 다시 시도
+            }
         }
     }
+
 }

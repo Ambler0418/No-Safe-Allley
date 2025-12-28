@@ -1,6 +1,8 @@
 using UnityEngine;
 using System; // 이벤트를 위해 추가
 using System.Collections.Generic; // Dictionary 사용을 위해 추가
+using System.Collections; // 코루틴 사용을 위해 추가
+using System.Linq;       // Linq 사용을 위해 추가
 
 public class GameManager : MonoBehaviour
 {
@@ -76,6 +78,15 @@ public class GameManager : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject); // 씬이 바뀌어도 GameManager는 파괴되지 않음
         }
+
+        // 게임 단계가 변경될 때마다 HandlePhaseChange 함수를 호출하도록 구독
+        OnPhaseChanged += HandlePhaseChange;
+    }
+
+    void OnDestroy()
+    {
+        // 오브젝트 파괴 시 이벤트 구독 해제
+        OnPhaseChanged -= HandlePhaseChange;
     }
 
     // --- 유닛 레지스트리 관리 ---
@@ -192,8 +203,7 @@ public class GameManager : MonoBehaviour
 
         Debug.Log("===== Player 1's Turn =====");
         Debug.Log("Phase: Placement - 카드를 1장 드로우하고 유닛/거점을 배치하세요.");
-        // 여기에 카드 1장 드로우 로직 추가
-        // 예: HandManager.Instance.DrawCard(1);
+        HandManager.Instance.DrawCards(1);
         currentPhase = GamePhase.Placement; // 이벤트 발생
     }
 
@@ -343,5 +353,101 @@ public class GameManager : MonoBehaviour
             Debug.Log($"에너지 {amount} 회복. 현재 에너지: {player1Energy}");
         }
         // 추후 Player2 로직 추가
+    }
+
+    /// <summary>
+    /// 지정된 플레이어의 HP를 감소시키고 게임 오버 조건을 체크합니다.
+    /// 이 메서드는 플레이어의 HP에 직접적인 피해가 가해질 때 호출되어야 합니다.
+    /// (예: 유닛이 플레이어의 본진에 도달했거나, 특정 스킬이 플레이어를 직접 공격할 때)
+    /// </summary>
+    public void ReducePlayerHealth(Player player, int amount)
+    {
+        if (player == Player.Player1)
+        {
+            player1Health -= amount;
+            Debug.Log($"Player 1 Health reduced by {amount}. Current Health: {player1Health}");
+        }
+        else if (player == Player.Player2)
+        {
+            player2Health -= amount;
+            Debug.Log($"Player 2 Health reduced by {amount}. Current Health: {player2Health}");
+        }
+
+        CheckGameOver(); // HP 감소 후 게임 오버 체크
+    }
+
+    /// <summary>
+    /// 현재 플레이어들의 HP를 확인하여 게임 오버 조건을 판단합니다.
+    /// </summary>
+    private void CheckGameOver()
+    {
+        if (player1Health <= 0)
+        {
+            Debug.Log("===== Game Over! Player 2 Wins! =====");
+            // 여기에 실제 게임 종료 처리 로직 추가 (예: 씬 전환, 게임 오버 UI 표시, 게임 정지 등)
+            Time.timeScale = 0; // 예시: 게임 일시정지
+            // UIManager.Instance.ShowGameOverScreen("Player 2 Wins!"); // 예시: UIManager를 통해 게임 오버 화면 표시
+        }
+        else if (player2Health <= 0)
+        {
+            Debug.Log("===== Game Over! Player 1 Wins! =====");
+            // 여기에 실제 게임 종료 처리 로직 추가
+            Time.timeScale = 0; // 예시: 게임 일시정지
+            // UIManager.Instance.ShowGameOverScreen("Player 1 Wins!"); // 예시: UIManager를 통해 게임 오버 화면 표시
+        }
+    }
+
+    /// <summary>
+    /// 게임 단계 변경을 감지하고, 적 턴일 경우 AI를 실행합니다.
+    /// </summary>
+    private void HandlePhaseChange()
+    {
+        if (_currentPhase == GamePhase.EnemyTurn)
+        {
+            StartCoroutine(ExecuteEnemyTurn());
+        }
+    }
+
+    /// <summary>
+    /// 간단한 적 AI의 행동을 처리하는 코루틴입니다.
+    /// </summary>
+    private IEnumerator ExecuteEnemyTurn()
+    {
+        Debug.Log("===== Enemy's Turn Starts =====");
+
+        // 1초 대기 (플레이어가 상황을 인지할 시간)
+        yield return new WaitForSeconds(1.0f);
+
+        // 행동 가능한 모든 적 유닛과 대상이 될 아군 유닛 목록을 만듭니다.
+        List<UnitInstance> enemyUnits = unitRegistry.Values.Where(u => u.owner == Player.Player2 && u.currentHealth > 0).ToList();
+        List<UnitInstance> playerUnits = unitRegistry.Values.Where(u => u.owner == Player.Player1 && u.currentHealth > 0).ToList();
+
+        // 공격할 적이나 공격받을 아군이 없으면 턴을 즉시 종료합니다.
+        if (enemyUnits.Count > 0 && playerUnits.Count > 0)
+        {
+            // 무작위로 공격자와 대상을 선택합니다.
+            UnitInstance attacker = enemyUnits[UnityEngine.Random.Range(0, enemyUnits.Count)];
+            UnitInstance target = playerUnits[UnityEngine.Random.Range(0, playerUnits.Count)];
+
+            Debug.Log($"Enemy AI: {attacker.sourceCardData.cardName}이(가) {target.sourceCardData.cardName}을(를) 공격합니다!");
+
+            // 타일 클릭과 동일하게 스킬을 실행합니다.
+            UnitCard attackerCard = attacker.sourceCardData as UnitCard;
+            if (attackerCard != null && attackerCard.activeSkill != null)
+            {
+                attackerCard.activeSkill.Execute(attacker, target.location);
+            }
+
+            // 결과 확인을 위해 1초 더 대기
+            yield return new WaitForSeconds(1.0f);
+        }
+        else
+        {
+            Debug.Log("행동할 적 유닛 또는 대상이 없어 적 턴을 스킵합니다.");
+        }
+
+        Debug.Log("===== Enemy's Turn Ends =====");
+        // 적 턴 종료 처리
+        OnEnemyTurnEnd();
     }
 }

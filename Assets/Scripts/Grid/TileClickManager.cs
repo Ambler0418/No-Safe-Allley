@@ -27,34 +27,50 @@ public class TileClickManager : MonoBehaviour
                 Vector3Int clickedCell = gameGrid.WorldToCell(worldPos);
                 clickedCell.z = 0;
 
-                // 아군 타일이 아닌 모든 곳을 대상으로 간주
-                if (!allyTilemap.HasTile(clickedCell))
+                UnitInstance caster = GameManager.Instance.skillCaster;
+                UnitCard unitCard = caster?.sourceCardData as UnitCard;
+
+                if (unitCard != null && unitCard.activeSkill != null)
                 {
-                    UnitInstance caster = GameManager.Instance.skillCaster;
-                    // 1. 시전자의 카드 데이터를 UnitCard로 형변환(casting) 시도
-                    UnitCard unitCard = caster?.sourceCardData as UnitCard;
+                    SkillEffect skillToUse = unitCard.activeSkill;
+                    UnitInstance targetUnit = GameManager.Instance.GetUnitAt(clickedCell);
 
-                    // 2. 형변환이 성공했고, activeSkill이 할당되어 있는지 확인
-                    if (unitCard != null && unitCard.activeSkill != null)
+                    // --- 타겟 유효성 검사 로직 (새로 추가/변경) ---
+                    bool isValidTarget = false;
+                    if (skillToUse.targetType == SkillTargetType.Ally)
                     {
-                        SkillEffect skillToUse = unitCard.activeSkill; // 이제 activeSkill에 접근 가능
-
-                        // 에너지 확인 및 소모 (skillToUse에서 가져옴)
-                        if (GameManager.Instance.SpendEnergy(skillToUse.energyCost))
+                        // 아군 대상 스킬인데, 클릭한 곳에 아군이 있으면 유효
+                        if (targetUnit != null && targetUnit.owner == caster.owner)
                         {
-                            // 스킬 사용 플래그 설정
-                            caster.hasUsedSkillThisTurn = true;
-                            
-                            // 연결된 스킬의 Execute 메서드 호출!
-                            skillToUse.Execute(caster, clickedCell);
-                        }
-                        else
-                        {
-                            Debug.Log("에너지가 부족하여 스킬을 사용할 수 없습니다.");
+                            isValidTarget = true;
                         }
                     }
-                    // 스킬 사용 시도 후 타겟팅 모드 종료
-                    GameManager.Instance.ExitSkillTargetingMode();
+                    else // SkillTargetType.Enemy
+                    {
+                        // 적군 대상 스킬인데, 클릭한 곳에 적군이 있으면 유효
+                        if (targetUnit != null && targetUnit.owner != caster.owner)
+                        {
+                            isValidTarget = true;
+                        }
+                    }
+                    // -------------------------------------------
+
+                    if (isValidTarget)
+                    {
+                        // 타겟이 유효할 때만 에너지 소모 및 스킬 실행
+                        if (GameManager.Instance.SpendEnergy(skillToUse.energyCost))
+                        {
+                            caster.hasUsedSkillThisTurn = true;
+                            skillToUse.Execute(caster, clickedCell);
+                        }
+                        // 스킬 사용 성공/실패 여부와 관계없이 타겟팅 모드 종료
+                        GameManager.Instance.ExitSkillTargetingMode();
+                    }
+                    else
+                    {
+                        // 타겟이 유효하지 않으면, 메시지만 띄우고 스킬 모드는 유지
+                        Debug.Log("잘못된 대상입니다. 다시 선택해주세요.");
+                    }
                 }
             }
             // 마우스 우클릭으로 대상 지정 취소

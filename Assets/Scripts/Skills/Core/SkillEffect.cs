@@ -1,6 +1,15 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+/// <summary>
+/// 스킬의 주요 타겟 유형을 정의합니다.
+/// </summary>
+public enum SkillTargetType
+{
+    Enemy, // 적군 대상 스킬
+    Ally   // 아군 대상 스킬
+}
+
 [CreateAssetMenu(fileName = "New Skill Effect", menuName = "Skills/Skill Effect")]
 public class SkillEffect : ScriptableObject
 {
@@ -9,6 +18,10 @@ public class SkillEffect : ScriptableObject
     [TextArea]
     public string skillDescription;
     public int energyCost;
+
+    // --- 아래 한 줄 추가 ---
+    public SkillTargetType targetType; // 스킬의 타겟 유형 (아군/적군)
+    // --------------------
 
     [Header("Skill Composition")]
     public AreaPattern areaPattern; // 이 스킬이 사용할 범위 패턴

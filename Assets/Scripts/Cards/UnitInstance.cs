@@ -10,8 +10,11 @@ public class UnitInstance : MonoBehaviour
     public int currentHealth;
     public Vector3Int location; // Grid 셀 위치
     public bool hasUsedSkillThisTurn = false; // 이번 턴에 스킬을 사용했는지 여부
+    private HealthBar healthBar;
 
+    private Canvas HealthBarCanvas;
     public int maxHealth
+
     {
         get
         {
@@ -52,6 +55,10 @@ public class UnitInstance : MonoBehaviour
             {
                 spriteRenderer.enabled = _isVisible;
             }
+            if (HealthBarCanvas != null)
+            {
+                HealthBarCanvas.enabled = _isVisible;
+            }
         }
     }
 
@@ -59,6 +66,12 @@ public class UnitInstance : MonoBehaviour
     {
         // 컴포넌트 참조 캐싱
         spriteRenderer = GetComponent<SpriteRenderer>();
+        healthBar = GetComponentInChildren<HealthBar>();
+        HealthBarCanvas = GetComponentInChildren<Canvas>();
+        if (healthBar == null)
+        {
+            Debug.LogError(this.gameObject.name + "에서 HealthBar 컴포넌트를 찾을 수 없습니다! 프리팹 설정을 확인하세요.");
+        }
     }
 
     // UnitCard와 BaseCard 모두를 초기화하기 위해 CardData를 매개변수로 받습니다.
@@ -84,6 +97,8 @@ public class UnitInstance : MonoBehaviour
             Debug.LogError($"[UnitInstance] 알 수 없는 카드 타입으로 초기화 시도: {data.cardName}");
             currentHealth = 1; // 안전 값
         }
+        healthBar.updateHealthBar(currentHealth, maxHealth);
+        IsVisible = _isVisible;
     }
 
     // 예시: 데미지를 입는 함수
@@ -94,11 +109,22 @@ public class UnitInstance : MonoBehaviour
 
         currentHealth -= damage;
         Debug.Log($"{sourceCardData.cardName}이 {damage} 데미지를 입었습니다. 남은 체력: {currentHealth}");
+        healthBar.updateHealthBar(currentHealth, maxHealth);
 
         if (currentHealth <= 0)
         {
             Die();
         }
+    }
+
+    public void heal(int amount)
+    {
+        currentHealth += amount;
+        if (currentHealth > maxHealth)
+            currentHealth = maxHealth;
+
+        Debug.Log($"{sourceCardData.cardName}이(가) {amount}만큼 회복했습니다. 현재 체력: {currentHealth}");
+        healthBar.updateHealthBar(currentHealth, maxHealth);
     }
 
     // 예시: 파괴되는 함수
@@ -107,10 +133,7 @@ public class UnitInstance : MonoBehaviour
         Debug.Log($"{sourceCardData.cardName}이 파괴되었습니다.");
         GameManager.Instance.DeregisterUnit(this.location); // 레지스트리에서 자신을 제거
         Destroy(gameObject);
-        if(owner == GameManager.Player.Player1)
-            GameManager.Instance.player1Health -= maxHealth;
-        else
-            GameManager.Instance.player2Health -= maxHealth;
+        GameManager.Instance.ReducePlayerHealth(owner, maxHealth);
     }
 
     // 마우스 클릭 시 호출되는 Unity 이벤트 함수

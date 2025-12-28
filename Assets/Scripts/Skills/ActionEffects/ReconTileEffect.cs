@@ -11,7 +11,6 @@ public class ReconTileEffect : ActionEffect
         if (targetUnit != null && targetUnit.owner != caster.owner && !targetUnit.IsVisible)
         {
             // 모습을 보이게 하고 타일을 강조표시합니다.
-            targetUnit.IsVisible = true; // 유닛을 보이게 함
             TileEffectManager.Instance.HighlightReconTile(targetTile);
             Debug.Log($"정찰 성공! {targetTile} 위치에서 숨어있던 적 유닛({targetUnit.sourceCardData.cardName})을 발견했습니다.");
         }
