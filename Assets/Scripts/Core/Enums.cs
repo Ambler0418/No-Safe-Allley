@@ -24,4 +24,13 @@ public class Enums
         TwoStar = 2, // 최대 10장 제한
         ThreeStar = 3  // 최대 5장 제한
     }
+
+    // 전술 카드 효과 종류 (향후 ActionEffect 구현 시 참고)
+    public enum TacticsEffectType
+    {
+        DrawCard,
+        HealUnit,
+        GainEnergy,
+        // ... 기타 효과
+    }
 }

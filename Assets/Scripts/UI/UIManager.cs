@@ -76,15 +76,23 @@ public class UIManager : MonoBehaviour
         UnitCard unitCard = GameManager.Instance.selectedUnit.sourceCardData as UnitCard;
         if (unitCard == null) return;
 
-        // 1. 에너지 확인
-        if (GameManager.Instance.HasEnoughEnergy(unitCard.skillEnergyCost))
+        // 새로운 로직: activeSkill이 있는지 확인하고 그 energyCost를 사용
+        if (unitCard.activeSkill != null)
         {
-            // 2. GameManager에 타겟팅 모드 진입 요청
-            GameManager.Instance.EnterSkillTargetingMode();
+            // 1. 에너지 확인
+            if (GameManager.Instance.HasEnoughEnergy(unitCard.activeSkill.energyCost))
+            {
+                // 2. GameManager에 타겟팅 모드 진입 요청
+                GameManager.Instance.EnterSkillTargetingMode();
+            }
+            else
+            {
+                Debug.LogWarning($"{unitCard.cardName} 스킬 사용 실패: 에너지가 부족합니다.");
+            }
         }
         else
         {
-            Debug.LogWarning($"{unitCard.cardName} 스킬 사용 실패: 에너지가 부족합니다.");
+            Debug.LogWarning($"{unitCard.cardName}은(는) 사용할 스킬이 없습니다.");
         }
     }
 
@@ -168,12 +176,20 @@ public class UIManager : MonoBehaviour
                 useSkillButton.interactable = false;
                 useSkillButtonText.text = "사용 완료";
             }
-            else if (unitCard.skillEnergyCost > 0)
+            else if (unitCard.activeSkill != null) // unitCard.activeSkill이 존재하는지 먼저 확인
             {
-                useSkillButton.interactable = true;
-                useSkillButtonText.text = $"스킬 ({unitCard.skillEnergyCost})";
+                if (unitCard.activeSkill.energyCost > 0) // 스킬이 있고, 에너지 비용이 0보다 크면
+                {
+                    useSkillButton.interactable = true;
+                    useSkillButtonText.text = $"스킬 ({unitCard.activeSkill.energyCost})";
+                }
+                else // 스킬이 있지만 에너지 비용이 0이거나 음수면 (무료 스킬)
+                {
+                    useSkillButton.interactable = true; // 무료 스킬도 사용 가능하게
+                    useSkillButtonText.text = "스킬 (무료)";
+                }
             }
-            else
+            else // activeSkill이 null이면 스킬 없음
             {
                 useSkillButton.interactable = false;
                 useSkillButtonText.text = "스킬 없음";

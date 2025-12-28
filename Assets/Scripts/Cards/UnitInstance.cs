@@ -11,6 +11,32 @@ public class UnitInstance : MonoBehaviour
     public Vector3Int location; // Grid 셀 위치
     public bool hasUsedSkillThisTurn = false; // 이번 턴에 스킬을 사용했는지 여부
 
+    public int maxHealth
+    {
+        get
+        {
+            if (sourceCardData is UnitCard unitData)
+            {
+                return unitData.maxHealth;
+            }
+            else if (sourceCardData is BaseCard baseData)
+            {
+                return baseData.maxHealth;
+            }
+            else
+            {
+                Debug.LogError($"[UnitInstance] 알 수 없는 카드 타입에서 maxHealth를 가져오려 함: {sourceCardData.cardName}");
+                return 1; // 안전 값
+            }
+        }
+    }
+
+    // 유닛의 공격력 (UnitCard에서 가져옴)
+    public int Attack => (sourceCardData as UnitCard)?.attack ?? 0;
+    // 유닛의 방어력 (UnitCard에서 가져옴)
+    public int Defense => (sourceCardData as UnitCard)?.defense ?? 0;
+
+
     // 내부 컴포넌트 및 상태
     private SpriteRenderer spriteRenderer;
     private bool _isVisible = true;
@@ -63,6 +89,9 @@ public class UnitInstance : MonoBehaviour
     // 예시: 데미지를 입는 함수
     public void TakeDamage(int damage)
     {
+        // 데미지를 받으면 자신의 모습을 드러냅니다.
+        IsVisible = true;
+
         currentHealth -= damage;
         Debug.Log($"{sourceCardData.cardName}이 {damage} 데미지를 입었습니다. 남은 체력: {currentHealth}");
 
@@ -78,6 +107,10 @@ public class UnitInstance : MonoBehaviour
         Debug.Log($"{sourceCardData.cardName}이 파괴되었습니다.");
         GameManager.Instance.DeregisterUnit(this.location); // 레지스트리에서 자신을 제거
         Destroy(gameObject);
+        if(owner == GameManager.Player.Player1)
+            GameManager.Instance.player1Health -= maxHealth;
+        else
+            GameManager.Instance.player2Health -= maxHealth;
     }
 
     // 마우스 클릭 시 호출되는 Unity 이벤트 함수

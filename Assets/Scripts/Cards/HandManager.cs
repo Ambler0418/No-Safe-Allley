@@ -35,11 +35,6 @@ public class HandManager : MonoBehaviour
         gameDeck.Add(auroraCard);
         gameDeck.Add(energyRefillCard);
         gameDeck.Add(boomCard);
-
-        for (int i = 0; i < 10; i++)
-        {
-            gameDeck.Add(randomCard);
-        }
     }
 
     // 덱을 섞는 함수 (Fisher-Yates Shuffle)

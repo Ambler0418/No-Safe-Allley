@@ -58,8 +58,8 @@ public class GameManager : MonoBehaviour
     public UnitCard boomCardData; // 테스트용으로 생성할 Boom 카드 데이터
 
     [Header("Player Stats")]
-    public int player1Health = 100;
-    public int player2Health = 100;
+    public int player1Health = 1000;
+    public int player2Health = 1000;
     public int player1Energy = 100;
     public int player2Energy = 100;
 
@@ -293,45 +293,6 @@ public class GameManager : MonoBehaviour
         Debug.Log("스킬 대상 지정 모드 종료.");
     }
 
-    public void ExecuteReconSkill(Vector3Int targetCell)
-    {
-        if (!isTargetingSkill || skillCaster == null) return;
-
-        UnitCard unitCard = skillCaster.sourceCardData as UnitCard;
-        if (unitCard == null)
-        {
-            ExitSkillTargetingMode();
-            return;
-        }
-
-        // --- Updated Logic ---
-        // 1. 먼저 에너지를 소모시킴
-        if (SpendEnergy(unitCard.skillEnergyCost))
-        {
-            Debug.Log($"정찰 시도. 에너지 소모. 대상: {targetCell}");
-            skillCaster.hasUsedSkillThisTurn = true; // 스킬 사용 플래그 설정
-
-            // 2. 에너지 소모 성공 후, 대상 타일에 적이 있는지 확인
-            UnitInstance targetUnit = GetUnitAt(targetCell);
-            if (targetUnit != null && targetUnit.owner != currentPlayer && !targetUnit.IsVisible)
-            {
-                Debug.Log($"정찰 성공! {targetCell} 위치에서 적 유닛({targetUnit.sourceCardData.cardName})을 감지했습니다.");
-                TileEffectManager.Instance.HighlightReconTile(targetCell);
-            }
-            else
-            {
-                Debug.Log($"정찰 실패: {targetCell} 위치에 숨어있는 적 유닛이 없습니다.");
-            }
-        }
-        else
-        {
-            Debug.Log("에너지가 부족하여 정찰을 시도할 수 없습니다.");
-        }
-        // --- End of Updated Logic ---
-
-        // 스킬 사용 시도의 성공/실패 여부와 관계없이 타겟팅 모드 종료
-        ExitSkillTargetingMode();
-    }
 
     // --- 에너지 관리 시스템 ---
 
@@ -369,5 +330,18 @@ public class GameManager : MonoBehaviour
         // UI 업데이트를 위해 이벤트를 발생시키거나 직접 UIManager를 호출할 수 있습니다.
         // 여기서는 UIManager가 매 프레임 UI를 업데이트하므로 별도 호출은 생략합니다.
         return true;
+    }
+
+    /// <summary>
+    /// 현재 플레이어의 에너지를 특정 양만큼 회복합니다.
+    /// </summary>
+    public void AddEnergy(int amount)
+    {
+        if (currentPlayer == Player.Player1)
+        {
+            player1Energy += amount;
+            Debug.Log($"에너지 {amount} 회복. 현재 에너지: {player1Energy}");
+        }
+        // 추후 Player2 로직 추가
     }
 }

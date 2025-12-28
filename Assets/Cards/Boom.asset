@@ -22,5 +22,4 @@ MonoBehaviour:
   maxHealth: 100
   attack: 100
   defense: 100
-  skillDescription: 
-  skillEnergyCost: 0
+  activeSkill: {fileID: 11400000, guid: 5c524358da0e2974caea79fb553bb2b9, type: 2}

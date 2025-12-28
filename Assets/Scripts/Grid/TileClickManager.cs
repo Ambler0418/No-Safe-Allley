@@ -30,12 +30,31 @@ public class TileClickManager : MonoBehaviour
                 // 아군 타일이 아닌 모든 곳을 대상으로 간주
                 if (!allyTilemap.HasTile(clickedCell))
                 {
-                    GameManager.Instance.ExecuteReconSkill(clickedCell);
-                }
-                else
-                {
-                    Debug.Log("스킬 사용 실패: 아군 영역에는 사용할 수 없습니다.");
-                    GameManager.Instance.ExitSkillTargetingMode(); // 잘못된 위치 클릭 시 타겟팅 모드 종료
+                    UnitInstance caster = GameManager.Instance.skillCaster;
+                    // 1. 시전자의 카드 데이터를 UnitCard로 형변환(casting) 시도
+                    UnitCard unitCard = caster?.sourceCardData as UnitCard;
+
+                    // 2. 형변환이 성공했고, activeSkill이 할당되어 있는지 확인
+                    if (unitCard != null && unitCard.activeSkill != null)
+                    {
+                        SkillEffect skillToUse = unitCard.activeSkill; // 이제 activeSkill에 접근 가능
+
+                        // 에너지 확인 및 소모 (skillToUse에서 가져옴)
+                        if (GameManager.Instance.SpendEnergy(skillToUse.energyCost))
+                        {
+                            // 스킬 사용 플래그 설정
+                            caster.hasUsedSkillThisTurn = true;
+                            
+                            // 연결된 스킬의 Execute 메서드 호출!
+                            skillToUse.Execute(caster, clickedCell);
+                        }
+                        else
+                        {
+                            Debug.Log("에너지가 부족하여 스킬을 사용할 수 없습니다.");
+                        }
+                    }
+                    // 스킬 사용 시도 후 타겟팅 모드 종료
+                    GameManager.Instance.ExitSkillTargetingMode();
                 }
             }
             // 마우스 우클릭으로 대상 지정 취소

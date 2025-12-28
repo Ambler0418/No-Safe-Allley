@@ -76,16 +76,32 @@ public bool TryPlaceCard(CardData card, Vector3 worldPosition)
     }
     else if (card.cardType == Enums.CardType.Tactics)
     {
-        // 🌟🌟🌟 수정: 전술 카드 사용 처리 🌟🌟🌟
-        // 전술 카드는 필드에 배치하는 것이 아니라 즉시 효과를 발동합니다.
-        
-        // 1. 사용에 필요한 추가 유효성 검사 (예: 비용, 타겟팅) 로직이 여기에 들어갑니다.
-        // 현재는 간단히 성공으로 간주합니다.
-        
-        Debug.Log($"[Tactics Card] '{card.cardName}'가 사용되었습니다. (즉시 파괴)");
-        
-        // true를 반환하여 UICard가 카드를 파괴하도록 합니다.
-        return true; 
+        TacticsCard tacticsCard = card as TacticsCard;
+        if (tacticsCard == null || tacticsCard.tacticSkill == null)
+        {
+            Debug.LogWarning($"사용하려는 전술 카드({card.cardName})에 스킬이 연결되지 않았습니다.");
+            return false;
+        }
+
+        SkillEffect skillToUse = tacticsCard.tacticSkill;
+
+        // 1. 에너지 확인 및 소모
+        if (GameManager.Instance.SpendEnergy(skillToUse.energyCost))
+        {
+            Debug.Log($"[Tactics Card] '{card.cardName}' 사용. 에너지 {skillToUse.energyCost} 소모.");
+
+            // 2. 스킬 효과 발동
+            // 전술 카드는 필드 위 유닛이 시전하는 것이 아니므로 caster는 null,
+            // 타겟이 없는 스킬이므로 primaryTarget은 임의의 값(zero)을 넘겨줍니다.
+            skillToUse.Execute(null, Vector3Int.zero);
+
+            return true; // 사용 성공 -> 카드 파괴
+        }
+        else
+        {
+            Debug.Log($"에너지가 부족하여 '{card.cardName}' 카드를 사용할 수 없습니다.");
+            return false; // 사용 실패 -> 카드를 손으로 돌려보냄
+        }
     }
 
     return false;

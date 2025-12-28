@@ -17,6 +17,4 @@ MonoBehaviour:
   cardType: 1
   description: 
   artwork: {fileID: 8707310738267839757, guid: 5c0037917e52cdb4f9daee474a474e65, type: 3}
-  energyCost: 0
-  effectType: 2
-  effectValue: 2
+  tacticSkill: {fileID: 11400000, guid: 28ba22f6b53ffda4084a7eafe494fa14, type: 2}

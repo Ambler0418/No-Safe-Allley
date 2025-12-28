@@ -9,14 +9,13 @@ public class UnitCard : CardData // CardData를 상속받음
     
     [Header("Unit Specific Stats")]
     public Enums.UnitClass unitClass;  // 유닛 분류 (Scout, Assault, Logistics)
-    public int maxHealth;              // 최대 체력 (원본)
-    public int attack;                 // 공격력 (원본)
-    public int defense;                // 방어력 (원본)
+    public int maxHealth;
+    public int attack;
+    public int defense;
 
     [Header("Skill")]
-    [TextArea]
-    public string skillDescription;     // 스킬 설명
-    public int skillEnergyCost;        // 스킬 사용 비용
+    // 이 카드가 사용할 스킬을 ScriptableObject 애셋으로 연결
+    public SkillEffect activeSkill;
     
     // 상태 변수 (currentHealth, location, revealed 등)는 여기서 제거합니다.
     // 이 값들은 인스턴스(필드 위의 유닛)가 관리합니다.

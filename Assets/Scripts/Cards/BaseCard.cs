@@ -11,4 +11,6 @@ public class BaseCard : CardData // CardData를 상속받음
     // 🌟🌟🌟 추가: 필드 위에 배치될 거점의 이미지 🌟🌟🌟
     [Header("Base Placement Image")]
     public Sprite unitSprite; 
+
+    public SkillEffect activeSkill;
 }

@@ -18,9 +18,8 @@ MonoBehaviour:
   description: 
   artwork: {fileID: 6172851728139827590, guid: f10e2d6950d30594fa45acf06c361f63, type: 3}
   unitSprite: {fileID: 3756282102072125371, guid: 14b4a809ea952ee44aed2d299c613cca, type: 3}
-  unitClass: 1
+  unitClass: 0
   maxHealth: 100
   attack: 50
   defense: 50
-  skillDescription: 
-  skillEnergyCost: 3
+  activeSkill: {fileID: 11400000, guid: 9fff8fc9cd49dcb48bb08160964c1811, type: 2}

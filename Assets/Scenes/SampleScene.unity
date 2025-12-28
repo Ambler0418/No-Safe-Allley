@@ -1469,8 +1469,8 @@ MonoBehaviour:
   skillCaster: {fileID: 0}
   gameGrid: {fileID: 844136389}
   boomCardData: {fileID: 11400000, guid: faa7f63e55c55494d9120a02d195202e, type: 2}
-  player1Health: 100
-  player2Health: 100
+  player1Health: 1000
+  player2Health: 1000
   player1Energy: 100
   player2Energy: 100
 --- !u!4 &609212749
