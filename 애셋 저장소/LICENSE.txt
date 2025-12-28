@@ -1,0 +1,11 @@
+Copyright (c) 2025 Josep Valls Vargas
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of these assets, to deal in the assets without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the assets, and to permit persons to whom the assets are furnished to do so, subject to the following conditions:
+
+1. The above copyright notice and this permission notice shall be included in all copies or substantial portions of the assets.
+
+2. Attribution Alternative: Users must either (a) provide appropriate credit to Josep Valls Vargas, provide a link to the original assets, and indicate if changes were made; OR (b) make a donation of the amount indicated in the origial asset page found under https://josepvalls.itch.io/.
+
+3. AI Training Prohibition: These assets may not be used to train, fine-tune, test, or improve artificial intelligence systems, machine learning models, or similar technologies.
+
+THE ASSETS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.

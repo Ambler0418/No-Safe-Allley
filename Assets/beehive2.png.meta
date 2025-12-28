@@ -1,0 +1,1430 @@
+fileFormatVersion: 2
+guid: fbe8391864c04d14694a20e2b95f6df0
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -2995783993380558405
+    second: beehive2_0
+  - first:
+      213: 3719648001480528176
+    second: beehive2_1
+  - first:
+      213: -1435033004808897935
+    second: beehive2_2
+  - first:
+      213: -1713742185337611367
+    second: beehive2_3
+  - first:
+      213: 4823225088984097594
+    second: beehive2_4
+  - first:
+      213: -2535076865428254030
+    second: beehive2_5
+  - first:
+      213: -1971090488882807349
+    second: beehive2_6
+  - first:
+      213: 9122700526965514084
+    second: beehive2_7
+  - first:
+      213: -5687941659156397526
+    second: beehive2_8
+  - first:
+      213: 1475276199058490588
+    second: beehive2_9
+  - first:
+      213: -4029689353191887797
+    second: beehive2_10
+  - first:
+      213: -2129330430023278543
+    second: beehive2_11
+  - first:
+      213: -6798994545732247082
+    second: beehive2_12
+  - first:
+      213: 1041437676336589911
+    second: beehive2_13
+  - first:
+      213: 4623650218893134891
+    second: beehive2_14
+  - first:
+      213: 5005706169339975275
+    second: beehive2_15
+  - first:
+      213: -2981128773157089552
+    second: beehive2_16
+  - first:
+      213: 6395729747721932210
+    second: beehive2_17
+  - first:
+      213: -1040808620437337633
+    second: beehive2_18
+  - first:
+      213: -3914047640965812675
+    second: beehive2_19
+  - first:
+      213: 2618964739162146696
+    second: beehive2_20
+  - first:
+      213: -1683488506429625552
+    second: beehive2_21
+  - first:
+      213: 8452638867038039597
+    second: beehive2_22
+  - first:
+      213: 4575186587829270356
+    second: beehive2_23
+  - first:
+      213: -4435456374790284332
+    second: beehive2_24
+  - first:
+      213: -3847280901595848180
+    second: beehive2_25
+  - first:
+      213: 4331002047414115722
+    second: beehive2_26
+  - first:
+      213: 7359022724091800082
+    second: beehive2_27
+  - first:
+      213: -3236320230311269436
+    second: beehive2_28
+  - first:
+      213: 6434263933628553743
+    second: beehive2_29
+  - first:
+      213: -3210256066279321532
+    second: beehive2_30
+  - first:
+      213: -1754485506730956534
+    second: beehive2_31
+  - first:
+      213: -484799364533329542
+    second: beehive2_32
+  - first:
+      213: 153173537638755177
+    second: beehive2_33
+  - first:
+      213: -8342815110565338121
+    second: beehive2_34
+  - first:
+      213: 7276323131969423345
+    second: beehive2_35
+  - first:
+      213: -1079788004426425908
+    second: beehive2_36
+  - first:
+      213: 1699484029297178982
+    second: beehive2_37
+  - first:
+      213: -5389248335373605924
+    second: beehive2_38
+  - first:
+      213: 8834617482519901739
+    second: beehive2_39
+  - first:
+      213: 8750381443316122748
+    second: beehive2_40
+  - first:
+      213: 4578592195053646026
+    second: beehive2_41
+  - first:
+      213: 2740928648793889238
+    second: beehive2_42
+  - first:
+      213: -5353294365610473471
+    second: beehive2_43
+  - first:
+      213: 8451751155405186311
+    second: beehive2_44
+  - first:
+      213: -3000887863781904761
+    second: beehive2_45
+  - first:
+      213: 7743258374067139454
+    second: beehive2_46
+  - first:
+      213: 2277359979940426858
+    second: beehive2_47
+  - first:
+      213: 4775625427513054810
+    second: beehive2_48
+  - first:
+      213: -3193116109933861795
+    second: beehive2_49
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: beehive2_0
+      rect:
+        serializedVersion: 2
+        x: 103
+        y: 1895
+        width: 92
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb920c29456dc66d0800000000000000
+      internalID: -2995783993380558405
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_1
+      rect:
+        serializedVersion: 2
+        x: 381
+        y: 1851
+        width: 70
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0311db95628de9330800000000000000
+      internalID: 3719648001480528176
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_2
+      rect:
+        serializedVersion: 2
+        x: 586
+        y: 1851
+        width: 121
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 17a7763d51db51ce0800000000000000
+      internalID: -1435033004808897935
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_3
+      rect:
+        serializedVersion: 2
+        x: 829
+        y: 1895
+        width: 134
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 99b995eef809738e0800000000000000
+      internalID: -1713742185337611367
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_4
+      rect:
+        serializedVersion: 2
+        x: 1098
+        y: 1895
+        width: 121
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a3326a4f9a98fe240800000000000000
+      internalID: 4823225088984097594
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_5
+      rect:
+        serializedVersion: 2
+        x: 1405
+        y: 1895
+        width: 70
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2b296d5b50991dcd0800000000000000
+      internalID: -2535076865428254030
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_6
+      rect:
+        serializedVersion: 2
+        x: 1661
+        y: 1851
+        width: 70
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bcd3df5c4a745a4e0800000000000000
+      internalID: -1971090488882807349
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_7
+      rect:
+        serializedVersion: 2
+        x: 1866
+        y: 1851
+        width: 121
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 46f5c0e8bc75a9e70800000000000000
+      internalID: 9122700526965514084
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_8
+      rect:
+        serializedVersion: 2
+        x: 359
+        y: 1595
+        width: 79
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a2246de623f5011b0800000000000000
+      internalID: -5687941659156397526
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_9
+      rect:
+        serializedVersion: 2
+        x: 586
+        y: 1595
+        width: 108
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd4487ef2eb397410800000000000000
+      internalID: 1475276199058490588
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_10
+      rect:
+        serializedVersion: 2
+        x: 829
+        y: 1595
+        width: 121
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b4ce2db22eaa318c0800000000000000
+      internalID: -4029689353191887797
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_11
+      rect:
+        serializedVersion: 2
+        x: 1098
+        y: 1595
+        width: 108
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 130680d61491372e0800000000000000
+      internalID: -2129330430023278543
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_12
+      rect:
+        serializedVersion: 2
+        x: 1399
+        y: 1595
+        width: 63
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6d1afc7bb7e15a1a0800000000000000
+      internalID: -6798994545732247082
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_13
+      rect:
+        serializedVersion: 2
+        x: 1610
+        y: 1595
+        width: 121
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 75c20c18c0ee37e00800000000000000
+      internalID: 1041437676336589911
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_14
+      rect:
+        serializedVersion: 2
+        x: 1853
+        y: 1595
+        width: 121
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b2c48ce70618a2040800000000000000
+      internalID: 4623650218893134891
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_15
+      rect:
+        serializedVersion: 2
+        x: 586
+        y: 1339
+        width: 79
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b669d795d37d77540800000000000000
+      internalID: 5005706169339975275
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_16
+      rect:
+        serializedVersion: 2
+        x: 829
+        y: 1339
+        width: 70
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0fe864eec27e0a6d0800000000000000
+      internalID: -2981128773157089552
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_17
+      rect:
+        serializedVersion: 2
+        x: 1098
+        y: 1339
+        width: 63
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2bd4d5cc15232c850800000000000000
+      internalID: 6395729747721932210
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_18
+      rect:
+        serializedVersion: 2
+        x: 1354
+        y: 1339
+        width: 108
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fd90babf21e4e81f0800000000000000
+      internalID: -1040808620437337633
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_19
+      rect:
+        serializedVersion: 2
+        x: 1597
+        y: 1339
+        width: 121
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d3ee64678628ea9c0800000000000000
+      internalID: -3914047640965812675
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_20
+      rect:
+        serializedVersion: 2
+        x: 1866
+        y: 1339
+        width: 121
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 887880ded8e685420800000000000000
+      internalID: 2618964739162146696
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_21
+      rect:
+        serializedVersion: 2
+        x: 829
+        y: 1127
+        width: 92
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 03b2fc67f1c03a8e0800000000000000
+      internalID: -1683488506429625552
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_22
+      rect:
+        serializedVersion: 2
+        x: 1085
+        y: 1127
+        width: 70
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d2e667cf34ecd4570800000000000000
+      internalID: 8452638867038039597
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_23
+      rect:
+        serializedVersion: 2
+        x: 1341
+        y: 1127
+        width: 121
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 457f1b416f35e7f30800000000000000
+      internalID: 4575186587829270356
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_24
+      rect:
+        serializedVersion: 2
+        x: 1597
+        y: 1083
+        width: 70
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4db12eb5de71272c0800000000000000
+      internalID: -4435456374790284332
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_25
+      rect:
+        serializedVersion: 2
+        x: 1853
+        y: 1083
+        width: 121
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c022c3d5766bb9ac0800000000000000
+      internalID: -3847280901595848180
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_26
+      rect:
+        serializedVersion: 2
+        x: 1098
+        y: 871
+        width: 79
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a8d9b9d5a6fca1c30800000000000000
+      internalID: 4331002047414115722
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_27
+      rect:
+        serializedVersion: 2
+        x: 1354
+        y: 899
+        width: 108
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 21ae4838d20802660800000000000000
+      internalID: 7359022724091800082
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_28
+      rect:
+        serializedVersion: 2
+        x: 1597
+        y: 871
+        width: 121
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4cbe2e4b5e74613d0800000000000000
+      internalID: -3236320230311269436
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_29
+      rect:
+        serializedVersion: 2
+        x: 1866
+        y: 827
+        width: 121
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f0a990b15f81b4950800000000000000
+      internalID: 6434263933628553743
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_30
+      rect:
+        serializedVersion: 2
+        x: 61
+        y: 571
+        width: 134
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 440d06bcd11e273d0800000000000000
+      internalID: -3210256066279321532
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_31
+      rect:
+        serializedVersion: 2
+        x: 1383
+        y: 615
+        width: 79
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a09eabf2ab0d6a7e0800000000000000
+      internalID: -1754485506730956534
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_32
+      rect:
+        serializedVersion: 2
+        x: 1610
+        y: 615
+        width: 121
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a71e7a9eb85a549f0800000000000000
+      internalID: -484799364533329542
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_33
+      rect:
+        serializedVersion: 2
+        x: 1853
+        y: 571
+        width: 121
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 96ba2fb558e202200800000000000000
+      internalID: 153173537638755177
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_34
+      rect:
+        serializedVersion: 2
+        x: 61
+        y: 315
+        width: 134
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f3edfbebdd583c80800000000000000
+      internalID: -8342815110565338121
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_35
+      rect:
+        serializedVersion: 2
+        x: 330
+        y: 315
+        width: 121
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f7ceff3651baf460800000000000000
+      internalID: 7276323131969423345
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_36
+      rect:
+        serializedVersion: 2
+        x: 573
+        y: 315
+        width: 121
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cc95f6be782d301f0800000000000000
+      internalID: -1079788004426425908
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_37
+      rect:
+        serializedVersion: 2
+        x: 829
+        y: 315
+        width: 134
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 66935bb68b7c59710800000000000000
+      internalID: 1699484029297178982
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_38
+      rect:
+        serializedVersion: 2
+        x: 1085
+        y: 315
+        width: 121
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd3e0b3413b8535b0800000000000000
+      internalID: -5389248335373605924
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_39
+      rect:
+        serializedVersion: 2
+        x: 1354
+        y: 315
+        width: 121
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b26fd04eacdda9a70800000000000000
+      internalID: 8834617482519901739
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_40
+      rect:
+        serializedVersion: 2
+        x: 1597
+        y: 307
+        width: 134
+        height: 154
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c74070aaf899f6970800000000000000
+      internalID: 8750381443316122748
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_41
+      rect:
+        serializedVersion: 2
+        x: 1853
+        y: 306
+        width: 134
+        height: 156
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ac07c8dc75d6a8f30800000000000000
+      internalID: 4578592195053646026
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_42
+      rect:
+        serializedVersion: 2
+        x: 61
+        y: 59
+        width: 134
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6d91d02851cb90620800000000000000
+      internalID: 2740928648793889238
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_43
+      rect:
+        serializedVersion: 2
+        x: 317
+        y: 59
+        width: 121
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 10800bf232745b5b0800000000000000
+      internalID: -5353294365610473471
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_44
+      rect:
+        serializedVersion: 2
+        x: 586
+        y: 59
+        width: 121
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7056ce385e6aa4570800000000000000
+      internalID: 8451751155405186311
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_45
+      rect:
+        serializedVersion: 2
+        x: 829
+        y: 59
+        width: 134
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78eaf742364ba56d0800000000000000
+      internalID: -3000887863781904761
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_46
+      rect:
+        serializedVersion: 2
+        x: 1098
+        y: 59
+        width: 121
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e7337563774957b60800000000000000
+      internalID: 7743258374067139454
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_47
+      rect:
+        serializedVersion: 2
+        x: 1341
+        y: 59
+        width: 121
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a643a06f5deca9f10800000000000000
+      internalID: 2277359979940426858
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_48
+      rect:
+        serializedVersion: 2
+        x: 1596
+        y: 49
+        width: 136
+        height: 158
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a561d33260e664240800000000000000
+      internalID: 4775625427513054810
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beehive2_49
+      rect:
+        serializedVersion: 2
+        x: 1853
+        y: 50
+        width: 134
+        height: 156
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d54a0dcd0d5cfa3d0800000000000000
+      internalID: -3193116109933861795
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      beehive2_0: -2995783993380558405
+      beehive2_1: 3719648001480528176
+      beehive2_10: -4029689353191887797
+      beehive2_11: -2129330430023278543
+      beehive2_12: -6798994545732247082
+      beehive2_13: 1041437676336589911
+      beehive2_14: 4623650218893134891
+      beehive2_15: 5005706169339975275
+      beehive2_16: -2981128773157089552
+      beehive2_17: 6395729747721932210
+      beehive2_18: -1040808620437337633
+      beehive2_19: -3914047640965812675
+      beehive2_2: -1435033004808897935
+      beehive2_20: 2618964739162146696
+      beehive2_21: -1683488506429625552
+      beehive2_22: 8452638867038039597
+      beehive2_23: 4575186587829270356
+      beehive2_24: -4435456374790284332
+      beehive2_25: -3847280901595848180
+      beehive2_26: 4331002047414115722
+      beehive2_27: 7359022724091800082
+      beehive2_28: -3236320230311269436
+      beehive2_29: 6434263933628553743
+      beehive2_3: -1713742185337611367
+      beehive2_30: -3210256066279321532
+      beehive2_31: -1754485506730956534
+      beehive2_32: -484799364533329542
+      beehive2_33: 153173537638755177
+      beehive2_34: -8342815110565338121
+      beehive2_35: 7276323131969423345
+      beehive2_36: -1079788004426425908
+      beehive2_37: 1699484029297178982
+      beehive2_38: -5389248335373605924
+      beehive2_39: 8834617482519901739
+      beehive2_4: 4823225088984097594
+      beehive2_40: 8750381443316122748
+      beehive2_41: 4578592195053646026
+      beehive2_42: 2740928648793889238
+      beehive2_43: -5353294365610473471
+      beehive2_44: 8451751155405186311
+      beehive2_45: -3000887863781904761
+      beehive2_46: 7743258374067139454
+      beehive2_47: 2277359979940426858
+      beehive2_48: 4775625427513054810
+      beehive2_49: -3193116109933861795
+      beehive2_5: -2535076865428254030
+      beehive2_6: -1971090488882807349
+      beehive2_7: 9122700526965514084
+      beehive2_8: -5687941659156397526
+      beehive2_9: 1475276199058490588
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

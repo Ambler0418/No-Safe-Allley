@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9abd473f958f98143a60cfa6ad73d0d2, type: 3}
+  m_Name: Random
+  m_EditorClassIdentifier: Assembly-CSharp::TacticsCard
+  cardName: Random
+  rarity: 2
+  cardType: 1
+  description: 
+  artwork: {fileID: 8573962228187662794, guid: 95fd2d6b443952042bf13b7954774ea1, type: 3}
+  energyCost: 0
+  effectType: 0
+  effectValue: 0

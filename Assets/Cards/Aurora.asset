@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 015edef490fbcb342a3d1b4d88ddbacd, type: 3}
+  m_Name: Aurora
+  m_EditorClassIdentifier: Assembly-CSharp::UnitCard
+  cardName: Aurora
+  rarity: 3
+  cardType: 0
+  description: 
+  artwork: {fileID: -7204438618297021775, guid: a8ea33054557d8d459f74404c38dd3a3, type: 3}
+  unitSprite: {fileID: -8231564302207419865, guid: 4df0a10638b643b4fba52ee2e284173b, type: 3}
+  unitClass: 3
+  maxHealth: 100
+  attack: 100
+  defense: 100
+  skillDescription: 
+  skillEnergyCost: 0
