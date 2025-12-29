@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 60a66167569e2084caf33ace57ad6aba, type: 3}
-  m_Name: BasicEnergyRefill
+  m_Name: BasicHeal
   m_EditorClassIdentifier: Assembly-CSharp::SkillEffect
-  skillName: 
+  skillName: Aurora_Skill
   skillDescription: 
-  energyCost: 2
+  energyCost: 10
   targetType: 1
-  areaPattern: {fileID: 0}
+  areaPattern: {fileID: 11400000, guid: 187cf5269c6a00e48bdf4a051dcf92cb, type: 2}
   actionEffects:
-  - {fileID: 11400000, guid: 79cddcbeceb6b8646bea19ee0e9684e5, type: 2}
+  - {fileID: 11400000, guid: 201d1f0826efdd440b063af99411a6c0, type: 2}

@@ -9,21 +9,15 @@ public class HandManager : MonoBehaviour
     public UICard uiCardPrefab;
     public Transform handPanelTransform;
 
-    [Header("Deck Composition")]
-    public CardData reconCard;
-    public CardData barrierCard;
-    public CardData auroraCard;
-    public CardData energyRefillCard; // EnergyFill -> EnergyRefill로 가정
-    public CardData boomCard;
-    public CardData randomCard;
+    [Header("Fallback Deck")]
+    // 플레이어가 저장한 덱이 없을 때 사용할 기본 덱
+    [SerializeField] private List<CardData> defaultDeck = new List<CardData>();
 
-    private List<CardData> gameDeck = new List<CardData>();
-
-    private List<CardData> gameDeckBackup = new List<CardData>();
+    private List<CardData> runtimeDeck = new List<CardData>();
+    private List<CardData> runtimeDeckBackup = new List<CardData>();
 
     void Awake()
     {
-        // 싱글톤 패턴 설정
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -36,63 +30,72 @@ public class HandManager : MonoBehaviour
 
     void Start()
     {
-        BuildDeck();
-        ShuffleDeck();
-        DrawCards(5);
+        LoadDeckFromCoreManager();
+
+        // LoadDeckFromCoreManager 호출 후, runtimeDeck에 5장 이상의 카드가 있는지 확인
+        if (runtimeDeck.Count >= 5) // <-- 이 부분을 수정합니다.
+        {
+            ShuffleDeck();
+            DrawCards(5);
+        }
+        else
+        {
+            Debug.LogError("Deck is too small! No player deck saved with at least 5 cards, and no default deck configured with at least 5 cards. Cannot start battle."); // <-- 에러 메시지 수정
+        }
     }
 
-    // 덱을 구성하는 함수
-    void BuildDeck()
+    void LoadDeckFromCoreManager()
     {
-        gameDeck.Clear();
-
-        for(int i = 0; i < 3; i++)
+        // CoreManager가 있고, 저장된 덱에 카드가 1장 이상 있다면 그 덱을 사용
+        if (CoreManager.Instance != null && CoreManager.Instance.currentDeck.Count > 0)
         {
-            gameDeck.Add(reconCard);
-            gameDeck.Add(barrierCard);
-            gameDeck.Add(auroraCard);
-            gameDeck.Add(energyRefillCard);
-            gameDeck.Add(boomCard);
+            Debug.Log("Loading deck from CoreManager.");
+            runtimeDeck = new List<CardData>(CoreManager.Instance.currentDeck);
+        }
+        // 그렇지 않다면, Inspector에 설정된 기본 덱을 사용
+        else if (defaultDeck.Count > 0)
+        {
+            Debug.Log("CoreManager deck not found or empty. Using default deck.");
+            runtimeDeck = new List<CardData>(defaultDeck);
         }
 
-        gameDeckBackup = gameDeck;
-        
+        // 백업 덱도 함께 생성
+        if (runtimeDeck.Count > 0)
+        {
+            runtimeDeckBackup = new List<CardData>(runtimeDeck);
+        }
     }
 
-    // 덱을 섞는 함수 (Fisher-Yates Shuffle)
     void ShuffleDeck()
     {
-        for (int i = 0; i < gameDeck.Count; i++)
+        for (int i = 0; i < runtimeDeck.Count; i++)
         {
-            CardData temp = gameDeck[i];
-            int randomIndex = Random.Range(i, gameDeck.Count);
-            gameDeck[i] = gameDeck[randomIndex];
-            gameDeck[randomIndex] = temp;
+            CardData temp = runtimeDeck[i];
+            int randomIndex = Random.Range(i, runtimeDeck.Count);
+            runtimeDeck[i] = runtimeDeck[randomIndex];
+            runtimeDeck[randomIndex] = temp;
         }
     }
 
-    // 지정된 수만큼 카드를 드로우하는 함수
     public void DrawCards(int count)
     {
         for (int i = 0; i < count; i++)
         {
-            if (gameDeck.Count > 0)
+            if (runtimeDeck.Count > 0)
             {
-                // 덱의 맨 위에서 카드를 한 장 뽑음
-                CardData drawnCard = gameDeck[0];
-                gameDeck.RemoveAt(0);
+                CardData drawnCard = runtimeDeck[0];
+                runtimeDeck.RemoveAt(0);
 
-                // 카드 UI 생성 및 초기화
                 UICard newCard = Instantiate(uiCardPrefab, handPanelTransform);
                 newCard.Initialize(drawnCard);
             }
             else
             {
-                gameDeck = gameDeckBackup;
+                Debug.Log("Deck is empty. Reshuffling from backup.");
+                runtimeDeck = new List<CardData>(runtimeDeckBackup);
                 ShuffleDeck();
-                i--; // 덱이 비었을 때 다시 시도
+                i--;
             }
         }
     }
-
 }

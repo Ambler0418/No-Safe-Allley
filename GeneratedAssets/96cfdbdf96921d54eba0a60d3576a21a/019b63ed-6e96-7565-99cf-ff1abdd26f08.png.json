@@ -1,0 +1,20 @@
+{
+    "asset": "96cfdbdf96921d54eba0a60d3576a21a",
+    "fileName": "019b63ed-6e96-7565-99cf-ff1abdd26f08.png",
+    "prompt": "Simple red square",
+    "negativePrompt": "",
+    "model": "5b5b2af1-6ea4-4266-b087-cc9f3bf4f450",
+    "modelName": "Flux.1 Dev",
+    "customSeed": -1,
+    "w3CTraceId": "06d1323dcaf9df1c8ef991d2f1cf4a83",
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0
+}

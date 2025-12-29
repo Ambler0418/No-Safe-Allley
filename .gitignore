@@ -103,3 +103,6 @@ InitTestScene*.unity*
 *.slnx
 *.csproj
 .vscode/
+
+#etc
+*.pptx
