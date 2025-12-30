@@ -2,8 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-// 드래그 관련 3가지 인터페이스 구현
-public class UICard : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+// 드래그 및 호버 관련 인터페이스 구현
+public class UICard : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
     // 카드 데이터 (UnitCard, TacticsCard, BaseCard 모두 처리 가능)
     public CardData cardData; 
@@ -42,65 +42,67 @@ public class UICard : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
         // 2. 기타 시각적 요소 초기화 (필요하다면)
     }
 
-    // 1. 드래그 시작 시
+    // --- 드래그 이벤트 ---
     public void OnBeginDrag(PointerEventData eventData)
     {
-        // 1. 원래 위치와 부모 저장
+        HandManager.Instance.OnCardDragBegin(this); // 핸드 매니저에게 드래그 시작을 알림
+        HandManager.Instance.OnCardHoverExit(this); // 호버링 효과 즉시 해제
+        
         originalPosition = rectTransform.localPosition;
         originalParent = transform.parent;
-
-        // 2. 부모를 최상위 캔버스로 변경
-        //    - HandManager 같은 LayoutGroup의 제어에서 벗어나 자유롭게 움직이게 하기 위함
         transform.SetParent(GetComponentInParent<Canvas>().transform);
-        
-        // 3. 드래그 중에는 다른 UI와 상호작용하지 않도록 설정
         transform.SetAsLastSibling();
         canvasGroup.blocksRaycasts = false;
     }
 
-    // 2. 드래그 중
     public void OnDrag(PointerEventData eventData)
     {
-        // 가장 간단하고 직접적인 방법으로 위치를 설정합니다.
-        // 카드의 피벗(Pivot)이 마우스 커서를 따라갑니다.
         rectTransform.position = eventData.position;
-        
-        // 만약 이 방법으로도 중심이 맞지 않는다면, 피벗 자체의 문제입니다.
-        // 그 경우, Unity 에디터에서 UICard 프리팹의 RectTransform > Pivot 값을 (0.5, 0.5)로 설정해야 합니다.
+        rectTransform.localRotation = Quaternion.identity; // 드래그 중에는 각도를 0으로 설정
     }
 
-    // 3. 드래그 종료 시
     public void OnEndDrag(PointerEventData eventData)
     {
-        canvasGroup.blocksRaycasts = true; // Raycast 다시 활성화
+        HandManager.Instance.OnCardDragEnd(this); // 핸드 매니저에게 드래그 종료를 알림
+        canvasGroup.blocksRaycasts = true;
 
-        // 드래그가 끝난 스크린 좌표를 월드 좌표로 변환
-        // Camera.main이 씬의 메인 카메라를 참조한다고 가정
         Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         
         bool placementSuccess = false;
-
-        // 2단계에서 구현한 PlacementManager 호출
         if (PlacementManager.Instance != null)
         {
             placementSuccess = PlacementManager.Instance.TryPlaceCard(cardData, mouseWorldPosition);
         }
         else
         {
-            // 아직 PlacementManager를 씬에 생성하지 않았다면 경고
-            Debug.LogError("PlacementManager.Instance가 씬에 없습니다. 2단계를 진행해주세요.");
+            Debug.LogError("PlacementManager.Instance가 씬에 없습니다.");
         }
 
         if (placementSuccess)
         {
-            // 배치(유닛) 또는 사용(전술)에 성공했다면 카드 파괴
+            // HandManager의 논리 리스트에서 자신을 제거
+            HandManager.Instance.RemoveCardFromHand(this);
             Destroy(gameObject); 
         }
         else
         {
-            // 실패했다면 원래 부모와 위치로 복귀
             transform.SetParent(originalParent);
             rectTransform.localPosition = originalPosition;
         }
+    }
+
+    // --- 호버 이벤트 ---
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        // 드래그 중이 아닐 때만 호버 효과 적용
+        if (!eventData.dragging)
+        {
+            HandManager.Instance.OnCardHoverEnter(this);
+        }
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        HandManager.Instance.OnCardHoverExit(this);
     }
 }

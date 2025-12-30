@@ -8,6 +8,7 @@ public class UnitCard : CardData // CardData를 상속받음
     public Sprite unitSprite; //
     
     [Header("Unit Specific Stats")]
+    public Enums.CardRarity rarity;       // 카드 등급 (1, 2, 3성)
     public Enums.UnitClass unitClass;  // 유닛 분류 (Scout, Assault, Logistics)
     public int maxHealth;
     public int attack;
@@ -16,6 +17,11 @@ public class UnitCard : CardData // CardData를 상속받음
     [Header("Skill")]
     // 이 카드가 사용할 스킬을 ScriptableObject 애셋으로 연결
     public SkillEffect activeSkill;
+    
+    [Header("Conditional Skill (3-Star Only)")]
+    public SkillEffect conditionalSkill;
+    [TextArea]
+    public string conditionalSkillCondition;
     
     // 상태 변수 (currentHealth, location, revealed 등)는 여기서 제거합니다.
     // 이 값들은 인스턴스(필드 위의 유닛)가 관리합니다.

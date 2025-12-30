@@ -1463,14 +1463,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   currentPlayer: 0
-  hasPlacedCardThisTurn: 0
+  placementActionsPerTurn: 1
+  placementActionsTaken: 0
   selectedUnit: {fileID: 0}
   isTargetingSkill: 0
   skillCaster: {fileID: 0}
+  isMovingUnit: 0
+  unitToMove: {fileID: 0}
+  justEnteredMoveMode: 0
   gameGrid: {fileID: 844136389}
-  boomCardData: {fileID: 11400000, guid: faa7f63e55c55494d9120a02d195202e, type: 2}
-  player1Health: 1000
-  player2Health: 1000
+  boomCardData: {fileID: 11400000, guid: beb615bbb95f30d45b19724459696f70, type: 2}
+  player1Health: 15
+  player2Health: 15
   player1Energy: 100
   player2Energy: 100
 --- !u!4 &609212749
@@ -1603,6 +1607,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TileEffectManager
   effectTilemap: {fileID: 143296170}
   reconHighlightTile: {fileID: 11400000, guid: 75701a6ed171fff4c92db21a62c98acf, type: 2}
+  moveHighlightTile: {fileID: 11400000, guid: 0914596c21073bc43bce9fd42970805b, type: 2}
 --- !u!4 &665734637
 Transform:
   m_ObjectHideFlags: 0
@@ -1739,6 +1744,95 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &752059669
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 752059670}
+  - component: {fileID: 752059673}
+  - component: {fileID: 752059672}
+  - component: {fileID: 752059671}
+  m_Layer: 5
+  m_Name: HandTriggerZone
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &752059670
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 752059669}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1924604304}
+  m_Father: {fileID: 1068284895}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 150}
+  m_Pivot: {x: 0.5, y: 0}
+--- !u!114 &752059671
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 752059669}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea860d713f23d134cab7acecfbcfdef3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HandInteractionZone
+--- !u!114 &752059672
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 752059669}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &752059673
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 752059669}
+  m_CullTransparentMesh: 1
 --- !u!1 &765716919
 GameObject:
   m_ObjectHideFlags: 0
@@ -2207,7 +2301,6 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1924604304}
   - {fileID: 250986548}
   - {fileID: 777629762}
   - {fileID: 765716920}
@@ -2215,6 +2308,7 @@ RectTransform:
   - {fileID: 181336698}
   - {fileID: 1986457669}
   - {fileID: 2094985196}
+  - {fileID: 752059670}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -2364,16 +2458,26 @@ MonoBehaviour:
   uiCardPrefab: {fileID: 3739682175552731356, guid: 2f451a37d2fa5b649aaa48bdd6324344, type: 3}
   handPanelTransform: {fileID: 1924604304}
   defaultDeck:
-  - {fileID: 11400000, guid: bf390f9a908b76e478c2aa60ae5f0daa, type: 2}
-  - {fileID: 11400000, guid: bf390f9a908b76e478c2aa60ae5f0daa, type: 2}
-  - {fileID: 11400000, guid: 4335ef53059ff8646842038396640b47, type: 2}
-  - {fileID: 11400000, guid: 4335ef53059ff8646842038396640b47, type: 2}
-  - {fileID: 11400000, guid: faa7f63e55c55494d9120a02d195202e, type: 2}
-  - {fileID: 11400000, guid: faa7f63e55c55494d9120a02d195202e, type: 2}
-  - {fileID: 11400000, guid: 59822c51a5da5d94f8841ba5cb1d8398, type: 2}
-  - {fileID: 11400000, guid: 59822c51a5da5d94f8841ba5cb1d8398, type: 2}
-  - {fileID: 11400000, guid: e8fb49996d1a5b24f8ddd0c64bdb622a, type: 2}
-  - {fileID: 11400000, guid: e8fb49996d1a5b24f8ddd0c64bdb622a, type: 2}
+  - {fileID: 11400000, guid: 7f2ac580fe9dbbc4182b506ec8a6935f, type: 2}
+  - {fileID: 11400000, guid: e7c924606a2aca343a3c4a4b28c6f153, type: 2}
+  - {fileID: 11400000, guid: df8f0de6db8cae243ad2f7707598bee9, type: 2}
+  - {fileID: 11400000, guid: f43240044b3415e42b932b413410306f, type: 2}
+  - {fileID: 11400000, guid: ded2a68261c66e54ca2443c27cf658a6, type: 2}
+  - {fileID: 11400000, guid: 0389a78dc04c7264f88ad1a0a9a9e39d, type: 2}
+  - {fileID: 11400000, guid: cf40c0b26b2625a4f944fa2bf972328a, type: 2}
+  - {fileID: 11400000, guid: 866b150866c0255438e80fab321a65c1, type: 2}
+  - {fileID: 11400000, guid: 7afa5adec238b0d4b85c67f42ce7f771, type: 2}
+  expandedArcRadius: 600
+  expandedMaxArcAngle: 70.4
+  expandedHeightOffset: 50
+  expandedFanOffset: -20
+  retractedArcRadius: 800
+  retractedMaxArcAngle: 40
+  retractedHeightOffset: -200
+  retractedFanOffset: -30
+  hoverScaleMultiplier: 1.15
+  hoverHeightBonus: 20
+  layoutTransitionSpeed: 8
 --- !u!4 &1255316826
 Transform:
   m_ObjectHideFlags: 0
@@ -3261,7 +3365,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1924604304}
-  - component: {fileID: 1924604305}
   m_Layer: 5
   m_Name: HandPannel
   m_TagString: Untagged
@@ -3276,44 +3379,18 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1924604303}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1068284895}
+  m_Father: {fileID: 752059670}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: -400, y: 170}
+  m_AnchoredPosition: {x: 0, y: 200}
   m_SizeDelta: {x: 200, y: 300}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1924604305
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1924604303}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.HorizontalLayoutGroup
-  m_Padding:
-    m_Left: 0
-    m_Right: 0
-    m_Top: 0
-    m_Bottom: 0
-  m_ChildAlignment: 4
-  m_Spacing: 0
-  m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 1
-  m_ChildControlWidth: 0
-  m_ChildControlHeight: 0
-  m_ChildScaleWidth: 0
-  m_ChildScaleHeight: 0
-  m_ReverseArrangement: 0
 --- !u!1 &1986457668
 GameObject:
   m_ObjectHideFlags: 0

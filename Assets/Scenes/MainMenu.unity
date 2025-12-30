@@ -1199,13 +1199,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9155e457937dcfe48904188be3e5b952, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CoreManager
+  playerGold: 100
   currentDeck: []
   startingCards:
-  - {fileID: 11400000, guid: bf390f9a908b76e478c2aa60ae5f0daa, type: 2}
-  - {fileID: 11400000, guid: 4335ef53059ff8646842038396640b47, type: 2}
-  - {fileID: 11400000, guid: faa7f63e55c55494d9120a02d195202e, type: 2}
-  - {fileID: 11400000, guid: 59822c51a5da5d94f8841ba5cb1d8398, type: 2}
-  - {fileID: 11400000, guid: e8fb49996d1a5b24f8ddd0c64bdb622a, type: 2}
+  - {fileID: 11400000, guid: 7f2ac580fe9dbbc4182b506ec8a6935f, type: 2}
+  - {fileID: 11400000, guid: e7c924606a2aca343a3c4a4b28c6f153, type: 2}
+  - {fileID: 11400000, guid: df8f0de6db8cae243ad2f7707598bee9, type: 2}
+  - {fileID: 11400000, guid: f43240044b3415e42b932b413410306f, type: 2}
+  - {fileID: 11400000, guid: ded2a68261c66e54ca2443c27cf658a6, type: 2}
+  - {fileID: 11400000, guid: 0389a78dc04c7264f88ad1a0a9a9e39d, type: 2}
+  - {fileID: 11400000, guid: cf40c0b26b2625a4f944fa2bf972328a, type: 2}
+  - {fileID: 11400000, guid: 866b150866c0255438e80fab321a65c1, type: 2}
+  - {fileID: 11400000, guid: 7afa5adec238b0d4b85c67f42ce7f771, type: 2}
+  - {fileID: 11400000, guid: beb615bbb95f30d45b19724459696f70, type: 2}
+  - {fileID: 11400000, guid: 6a0f722951385bb4ea8b2beda9a6df72, type: 2}
+  - {fileID: 11400000, guid: c9fafe27898a340469486f04b0f65afb, type: 2}
+  - {fileID: 11400000, guid: 1fb898a09f4998a409e4b72c5ed6394e, type: 2}
+  - {fileID: 11400000, guid: 5bddff8997d55684ca8acdb135b84406, type: 2}
+  - {fileID: 11400000, guid: 884795ef4bd4c4e449c57000e1a772e0, type: 2}
+  - {fileID: 11400000, guid: 5736662b57ed9fe4495a9e46184cb271, type: 2}
+  - {fileID: 11400000, guid: 5aa3959a4040d9f409e94d13a80093b8, type: 2}
+  - {fileID: 11400000, guid: fb3df59d5d6e9e845a454dce2c83e8f5, type: 2}
+  - {fileID: 11400000, guid: 09e46a4ea7f015944a56528f40359215, type: 2}
+  - {fileID: 11400000, guid: 33d6032096b5be245acc907a10362ea4, type: 2}
+  - {fileID: 11400000, guid: bd4a7a8d6bd19da4ea59705ec6723086, type: 2}
+  - {fileID: 11400000, guid: 8f7932432ef06a44d8b823994747319b, type: 2}
+  - {fileID: 11400000, guid: 3a20d5f9002210c48a823079037682c8, type: 2}
 --- !u!4 &1818138379
 Transform:
   m_ObjectHideFlags: 0

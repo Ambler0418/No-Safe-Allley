@@ -45,12 +45,16 @@ public class GameManager : MonoBehaviour
     public Player currentPlayer;
 
     [Header("Turn State")]
-    public bool hasPlacedCardThisTurn = false;
+    public int placementActionsPerTurn = 1; // 배치 단계에서 할 수 있는 행동 수
+    public int placementActionsTaken = 0;   // 이번 턴에 한 행동 수
 
     [Header("Selection State")]
     public UnitInstance selectedUnit; // 현재 선택된 유닛
     public bool isTargetingSkill = false; // 스킬 대상 지정 모드 여부
     public UnitInstance skillCaster; // 현재 스킬을 사용하려는 유닛
+    public bool isMovingUnit = false; // 유닛 이동 모드 여부
+    public UnitInstance unitToMove = null; // 현재 이동하려는 유닛
+    public bool justEnteredMoveMode = false; // 이동 모드 진입 직후의 클릭을 무시하기 위한 플래그
 
     [Header("Game Data")]
     public Dictionary<Vector3Int, UnitInstance> unitRegistry = new Dictionary<Vector3Int, UnitInstance>();
@@ -60,8 +64,8 @@ public class GameManager : MonoBehaviour
     public UnitCard boomCardData; // 테스트용으로 생성할 Boom 카드 데이터
 
     [Header("Player Stats")]
-    public int player1Health = 1000;
-    public int player2Health = 1000;
+    public int player1Health = 15;
+    public int player2Health = 15;
     public int player1Energy = 100;
     public int player2Energy = 100;
 
@@ -189,7 +193,7 @@ public class GameManager : MonoBehaviour
     public void StartPlayerTurn()
     {
         currentPlayer = Player.Player1;
-        hasPlacedCardThisTurn = false; // 턴 시작 시 배치 플래그 초기화
+        placementActionsTaken = 0; // 턴 시작 시 배치 행동 횟수 초기화
         DeselectUnit(); // 턴 시작 시 유닛 선택 해제
 
         // 모든 아군 유닛의 '스킬 사용' 상태를 초기화
@@ -301,6 +305,66 @@ public class GameManager : MonoBehaviour
         isTargetingSkill = false;
         skillCaster = null;
         Debug.Log("스킬 대상 지정 모드 종료.");
+    }
+
+    // --- 유닛 이동 시스템 ---
+    public void EnterMoveMode(UnitInstance unit)
+    {
+        // 1. 행동 횟수가 남아있는지 확인
+        if (placementActionsTaken >= placementActionsPerTurn)
+        {
+            Debug.Log("행동 횟수를 모두 소모하여 이동할 수 없습니다.");
+            return;
+        }
+
+        // 2. 유닛이 공개된 상태인지 확인
+        if (!unit.IsVisible)
+        {
+            Debug.Log("공개되지 않은 유닛은 이동할 수 없습니다.");
+            return;
+        }
+
+        // 3. 이동 모드 시작
+        isMovingUnit = true;
+        unitToMove = unit;
+        justEnteredMoveMode = true; // 이동 모드에 방금 진입했다고 알림
+        DeselectUnit(); // 이동 시작 시 기존 선택은 해제
+
+        Debug.Log($"{unit.sourceCardData.cardName}의 이동 시작. 이동할 타일을 클릭하세요.");
+    }
+
+    public void ExitMoveMode()
+    {
+        isMovingUnit = false;
+        unitToMove = null;
+        justEnteredMoveMode = false; // 플래그 초기화
+        // TileEffectManager.Instance.ClearAllEffectTiles(); // 타일 정리는 TileClickManager가 스스로 하도록 변경
+        Debug.Log("유닛 이동 모드 종료.");
+    }
+
+    public void ExecuteMove(Vector3Int destination)
+    {
+        if (unitToMove == null) return;
+
+        Vector3Int originalLocation = unitToMove.location;
+
+        // 1. 유닛 레지스트리 업데이트
+        DeregisterUnit(originalLocation);
+        RegisterUnit(destination, unitToMove);
+
+        // 2. 유닛 인스턴스 위치 정보 업데이트
+        unitToMove.location = destination;
+
+        // 3. 유닛 오브젝트의 실제 월드 위치 변경
+        unitToMove.transform.position = gameGrid.GetCellCenterWorld(destination);
+        
+        // 4. 행동 횟수 소모
+        placementActionsTaken++;
+        
+        Debug.Log($"{unitToMove.sourceCardData.cardName}이(가) {originalLocation}에서 {destination}으로 이동했습니다. 남은 행동: {placementActionsPerTurn - placementActionsTaken}");
+
+        // 5. 이동 모드 종료
+        ExitMoveMode();
     }
 
 

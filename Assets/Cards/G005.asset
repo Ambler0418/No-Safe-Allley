@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da155dd29256ec944b23e9de3ea85986, type: 3}
+  m_Name: G005
+  m_EditorClassIdentifier: Assembly-CSharp::BaseCard
+  cardName: "\uD589\uC815 \uCCAD\uC0AC"
+  cardType: 2
+  description: 
+  artwork: {fileID: -3122948064512410684, guid: 4d0cbdbed441bf74eb38e3ed08fd5a64, type: 3}
+  maxHealth: 1800
+  unitSprite: {fileID: 2920070367447021475, guid: 5d0063abcd5e9d64e8c4a06eaf0c96fd, type: 3}
+  activeSkill: {fileID: 0}

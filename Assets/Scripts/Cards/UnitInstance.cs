@@ -39,6 +39,23 @@ public class UnitInstance : MonoBehaviour
     // 유닛의 방어력 (UnitCard에서 가져옴)
     public int Defense => (sourceCardData as UnitCard)?.defense ?? 0;
 
+    // 카드의 종류(UnitCard, BaseCard)에 관계없이 활성화된 스킬을 가져오는 프로퍼티
+    public SkillEffect ActiveSkill
+    {
+        get
+        {
+            if (sourceCardData is UnitCard unitData)
+            {
+                return unitData.activeSkill;
+            }
+            if (sourceCardData is BaseCard baseData)
+            {
+                return baseData.activeSkill;
+            }
+            return null;
+        }
+    }
+
 
     // 내부 컴포넌트 및 상태
     private SpriteRenderer spriteRenderer;
@@ -132,24 +149,46 @@ public class UnitInstance : MonoBehaviour
     {
         Debug.Log($"{sourceCardData.cardName}이 파괴되었습니다.");
         GameManager.Instance.DeregisterUnit(this.location); // 레지스트리에서 자신을 제거
+
+        // 파괴된 것이 유닛 카드인 경우에만 플레이어에게 데미지를 줍니다.
+        if (sourceCardData is UnitCard unitCard)
+        {
+            // 피해량을 카드의 성급(rarity)으로 전달합니다.
+            int damageToPlayer = (int)unitCard.rarity;
+            GameManager.Instance.ReducePlayerHealth(owner, damageToPlayer);
+        }
+        // 거점(BaseCard)이 파괴될 경우에는 플레이어 데미지가 없습니다.
+
         Destroy(gameObject);
-        GameManager.Instance.ReducePlayerHealth(owner, maxHealth);
     }
 
-    // 마우스 클릭 시 호출되는 Unity 이벤트 함수
     void OnMouseDown()
     {
-        // '행동' 단계가 아니면 아무것도 하지 않음
-        if (GameManager.Instance.currentPhase != GameManager.GamePhase.Action) return;
+        var gm = GameManager.Instance;
         
         // 현재 턴의 플레이어가 유닛의 소유자가 아니면 아무것도 하지 않음
-        if (this.owner != GameManager.Instance.currentPlayer)
+        if (this.owner != gm.currentPlayer)
         {
             Debug.Log($"상대방의 유닛({sourceCardData.cardName})은 선택할 수 없습니다.");
             return;
         }
 
-        // 모든 조건을 통과하면 GameManager에 선택 요청
-        GameManager.Instance.SelectUnit(this);
+        // 게임 단계에 따라 다른 행동 수행
+        switch (gm.currentPhase)
+        {
+            // 배치 단계: 유닛 이동 모드 진입
+            case GameManager.GamePhase.Placement:
+                gm.EnterMoveMode(this);
+                break;
+            
+            // 행동 단계: 스킬 사용을 위해 유닛 선택
+            case GameManager.GamePhase.Action:
+                gm.SelectUnit(this);
+                break;
+            
+            // 그 외 단계에서는 아무것도 하지 않음
+            default:
+                return;
+        }
     }
 }

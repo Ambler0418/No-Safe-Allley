@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da155dd29256ec944b23e9de3ea85986, type: 3}
+  m_Name: S006
+  m_EditorClassIdentifier: Assembly-CSharp::BaseCard
+  cardName: "\uBE14\uB799 \uB9C8\uCF13"
+  cardType: 0
+  description: 
+  artwork: {fileID: -2164845291074721635, guid: ec51909872d25c74e85702c40124e6b5, type: 3}
+  maxHealth: 1200
+  unitSprite: {fileID: 2920070367447021475, guid: 5d0063abcd5e9d64e8c4a06eaf0c96fd, type: 3}
+  activeSkill: {fileID: 0}

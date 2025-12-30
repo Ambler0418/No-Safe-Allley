@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SkillEffect
   skillName: 
   skillDescription: 
-  energyCost: 0
+  energyCost: 3
+  targetType: 0
   areaPattern: {fileID: 11400000, guid: 187cf5269c6a00e48bdf4a051dcf92cb, type: 2}
   actionEffects:
   - {fileID: 11400000, guid: 5328cf1225c18de49a4beb47c7e153bc, type: 2}

@@ -39,10 +39,10 @@ public bool TryPlaceCard(CardData card, Vector3 worldPosition)
             return false;
         }
 
-        // 2. '배치 단계'이고, 이미 카드를 배치했다면 추가 배치 차단
-        if (gm.currentPhase == GameManager.GamePhase.Placement && gm.hasPlacedCardThisTurn)
+        // 2. '배치 단계'이고, 허용된 행동 횟수를 초과했는지 확인
+        if (gm.currentPhase == GameManager.GamePhase.Placement && gm.placementActionsTaken >= gm.placementActionsPerTurn)
         {
-            Debug.Log("배치 실패: 이번 턴의 배치 단계에서는 이미 유닛/거점을 배치했습니다.");
+            Debug.Log("배치 실패: 이번 턴에 더 이상 배치 또는 이동 행동을 할 수 없습니다.");
             return false;
         }
     }
@@ -63,12 +63,18 @@ public bool TryPlaceCard(CardData card, Vector3 worldPosition)
         // 2. 유닛 생성 로직
         SpawnUnit(card, cellLocation);
 
-        // --- 추가: 배치 성공 시 플래그 설정 ---
-        // '배치 단계'에서만 플래그를 설정하여, '준비 단계'에서는 여러 번 배치 가능하도록 함
+        // --- 추가: 배치 성공 시 행동 횟수 증가 ---
+        // '배치 단계'에서만 행동 횟수를 차감하여, '준비 단계'에서는 여러 번 배치 가능하도록 함
         if (gm.currentPhase == GameManager.GamePhase.Placement)
         {
-            gm.hasPlacedCardThisTurn = true;
-            Debug.Log("배치 단계에서 카드 배치 완료. 플래그를 설정합니다.");
+            gm.placementActionsTaken++;
+            Debug.Log($"배치 단계에서 행동 완료. 남은 행동: {gm.placementActionsPerTurn - gm.placementActionsTaken}");
+            
+            // 이동 모드 중에 배치를 했다면, 이동 모드를 즉시 종료
+            if (gm.isMovingUnit)
+            {
+                gm.ExitMoveMode();
+            }
         }
         // --- 설정 끝 ---
 

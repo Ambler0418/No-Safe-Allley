@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9abd473f958f98143a60cfa6ad73d0d2, type: 3}
+  m_Name: S007
+  m_EditorClassIdentifier: Assembly-CSharp::TacticsCard
+  cardName: "\uC778\uACF5\uD638\uD761\uAE30"
+  cardType: 0
+  description: 
+  artwork: {fileID: 2618161063657768857, guid: 8079ae2d3197ba54c962afb18a079d3a, type: 3}
+  energyCost: 3
+  tacticSkill: {fileID: 0}

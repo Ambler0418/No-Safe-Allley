@@ -8,91 +8,187 @@ public class TileClickManager : MonoBehaviour
     public Tilemap allyTilemap;
     public Tilemap enemyTilemap;
 
+    private Vector3Int lastHoveredTile;
+    private bool isMoveHoverTileSet = false;
+    private bool isSkillHoverTileSet = false;
+
     void Update()
     {
-        // --- 스킬 대상 지정 로직 ---
-        if (GameManager.Instance.isTargetingSkill)
+        var gm = GameManager.Instance;
+        var tem = TileEffectManager.Instance;
+
+        // --- 유닛 이동 로직 ---
+        if (gm.isMovingUnit)
         {
-            // UI를 클릭했다면, 스킬 타겟팅으로 간주하지 않음
-            if (Input.GetMouseButtonDown(0) && EventSystem.current.IsPointerOverGameObject())
+            if (gm.justEnteredMoveMode)
             {
-                Debug.Log("UI 클릭은 스킬 타겟팅에서 제외됩니다.");
+                gm.justEnteredMoveMode = false;
                 return;
             }
 
-            // 마우스 좌클릭으로 대상 지정
+            // 호버 로직
+            Vector3 worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector3Int currentHoverTile = gameGrid.WorldToCell(worldPos);
+            currentHoverTile.z = 0;
+
+            if (currentHoverTile != lastHoveredTile)
+            {
+                if (isMoveHoverTileSet)
+                {
+                    tem.effectTilemap.SetTile(lastHoveredTile, null);
+                    isMoveHoverTileSet = false;
+                }
+
+                bool isValid = gm.GetUnitAt(currentHoverTile) == null && allyTilemap.HasTile(currentHoverTile);
+                if (isValid)
+                {
+                    tem.effectTilemap.SetTile(currentHoverTile, tem.moveHighlightTile);
+                    isMoveHoverTileSet = true;
+                }
+                lastHoveredTile = currentHoverTile;
+            }
+
+            // 클릭 로직
+            if (Input.GetMouseButtonDown(1))
+            {
+                gm.ExitMoveMode();
+                return;
+            }
+            
             if (Input.GetMouseButtonDown(0))
             {
-                Vector3 worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                Vector3Int clickedCell = gameGrid.WorldToCell(worldPos);
-                clickedCell.z = 0;
+                if (EventSystem.current.IsPointerOverGameObject()) return;
 
-                UnitInstance caster = GameManager.Instance.skillCaster;
-                UnitCard unitCard = caster?.sourceCardData as UnitCard;
-
-                if (unitCard != null && unitCard.activeSkill != null)
+                if (currentHoverTile == gm.unitToMove.location)
                 {
-                    SkillEffect skillToUse = unitCard.activeSkill;
-                    UnitInstance targetUnit = GameManager.Instance.GetUnitAt(clickedCell);
+                    Debug.Log("이동을 취소합니다.");
+                    gm.ExitMoveMode();
+                    return;
+                }
+                
+                bool isValid = gm.GetUnitAt(currentHoverTile) == null && allyTilemap.HasTile(currentHoverTile);
+                if (isValid)
+                {
+                    gm.ExecuteMove(currentHoverTile);
+                }
+                else
+                {
+                    Debug.Log("이동할 수 없는 타일입니다. 이동을 취소합니다.");
+                    gm.ExitMoveMode();
+                }
+            }
+            return;
+        }
+        else
+        {
+            if (isMoveHoverTileSet)
+            {
+                tem.effectTilemap.SetTile(lastHoveredTile, null);
+                isMoveHoverTileSet = false;
+            }
+        }
 
-                    // --- 타겟 유효성 검사 로직 (새로 추가/변경) ---
-                    bool isValidTarget = false;
+        // --- 스킬 대상 지정 로직 ---
+        if (gm.isTargetingSkill)
+        {
+            // 호버 로직
+            Vector3 worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector3Int currentHoverTile = gameGrid.WorldToCell(worldPos);
+            currentHoverTile.z = 0;
+
+            if (currentHoverTile != lastHoveredTile)
+            {
+                if (isSkillHoverTileSet)
+                {
+                    tem.effectTilemap.SetTile(lastHoveredTile, null);
+                    isSkillHoverTileSet = false;
+                }
+                
+                SkillEffect skillToUse = gm.skillCaster?.ActiveSkill;
+                if (skillToUse != null)
+                {
+                    bool isValidHover = false;
                     if (skillToUse.targetType == SkillTargetType.Ally)
                     {
-                        // 아군 대상 스킬인데, 클릭한 곳에 아군이 있으면 유효
-                        if (targetUnit != null && targetUnit.owner == caster.owner)
-                        {
-                            isValidTarget = true;
-                        }
+                        isValidHover = allyTilemap.HasTile(currentHoverTile);
                     }
-                    else // SkillTargetType.Enemy
+                    else // Enemy
                     {
-                        // 적군 대상 스킬인데, 클릭한 곳에 적군이 있으면 유효
-                        if (targetUnit != null && targetUnit.owner != caster.owner)
-                        {
-                            isValidTarget = true;
-                        }
+                        isValidHover = enemyTilemap.HasTile(currentHoverTile);
                     }
-                    // -------------------------------------------
 
-                    if (isValidTarget)
+                    if (isValidHover)
                     {
-                        // 타겟이 유효할 때만 에너지 소모 및 스킬 실행
-                        if (GameManager.Instance.SpendEnergy(skillToUse.energyCost))
+                        tem.effectTilemap.SetTile(currentHoverTile, tem.moveHighlightTile); // 요청대로 recon이 아닌 move 타일 사용
+                        isSkillHoverTileSet = true;
+                    }
+                }
+                lastHoveredTile = currentHoverTile;
+            }
+
+            // 클릭 로직
+            if (Input.GetMouseButtonDown(1))
+            {
+                gm.ExitSkillTargetingMode();
+                return; 
+            }
+
+            if (Input.GetMouseButtonDown(0) && EventSystem.current.IsPointerOverGameObject()) return;
+
+            if (Input.GetMouseButtonDown(0))
+            {
+                UnitInstance caster = gm.skillCaster;
+                SkillEffect skillToUse = caster?.ActiveSkill;
+
+                if (skillToUse != null)
+                {
+                    // --- 수정된 타겟 유효성 검사 ---
+                    // 유닛의 존재 여부가 아닌, 타일맵의 소속으로 타겟 유효성 판단
+                    bool isValidTile = false;
+                    if (skillToUse.targetType == SkillTargetType.Ally)
+                    {
+                        isValidTile = allyTilemap.HasTile(currentHoverTile);
+                    }
+                    else // Enemy
+                    {
+                        isValidTile = enemyTilemap.HasTile(currentHoverTile);
+                    }
+
+                    if (isValidTile)
+                    {
+                        // 유효한 타일이면 유닛 존재 여부와 관계없이 스킬 발동 및 에너지 소모
+                        if (gm.SpendEnergy(skillToUse.energyCost))
                         {
                             caster.hasUsedSkillThisTurn = true;
-                            skillToUse.Execute(caster, clickedCell);
+                            skillToUse.Execute(caster, currentHoverTile);
                         }
-                        // 스킬 사용 성공/실패 여부와 관계없이 타겟팅 모드 종료
-                        GameManager.Instance.ExitSkillTargetingMode();
+                        gm.ExitSkillTargetingMode();
                     }
                     else
                     {
-                        // 타겟이 유효하지 않으면, 메시지만 띄우고 스킬 모드는 유지
-                        Debug.Log("잘못된 대상입니다. 다시 선택해주세요.");
+                        // 이제 이 부분은 맵 바깥을 클릭했을 때만 호출됨
+                        Debug.Log("지정할 수 없는 영역입니다.");
                     }
                 }
             }
-            // 마우스 우클릭으로 대상 지정 취소
-            else if (Input.GetMouseButtonDown(1))
+            return;
+        }
+        else
+        {
+            if (isSkillHoverTileSet)
             {
-                GameManager.Instance.ExitSkillTargetingMode();
+                tem.effectTilemap.SetTile(lastHoveredTile, null);
+                isSkillHoverTileSet = false;
             }
-            return; // 타겟팅 중에는 아래의 일반 클릭 로직을 실행하지 않음
         }
 
-        // --- 일반 타일 클릭 로직 (타겟팅 중이 아닐 때) ---
+        // --- 일반 타일 클릭 로직 ---
         if (Input.GetMouseButtonDown(0))
         {
-            // UI를 클릭했다면, 월드 클릭으로 간주하지 않고 무시
             if (EventSystem.current.IsPointerOverGameObject())
             {
                 return;
             }
-            
-            // 유닛 클릭은 UnitInstance의 OnMouseDown에서 처리되므로,
-            // 여기서는 특별한 로직을 수행하지 않습니다.
-            // "빈 공간 클릭 시 선택 해제" 로직을 제거하여 의도치 않은 선택 해제를 방지합니다.
         }
     }
 }

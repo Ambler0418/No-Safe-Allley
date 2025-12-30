@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using System.Collections.Generic; // 리스트 사용을 위해 추가
+using System.Linq; // Linq 사용을 위해 추가
 
 public class TileEffectManager : MonoBehaviour
 {
@@ -10,6 +12,7 @@ public class TileEffectManager : MonoBehaviour
 
     [Header("Effect Tiles")]
     public Tile reconHighlightTile; // 정찰 효과에 사용할 붉은색 타일 애셋
+    public Tile moveHighlightTile;  // 이동 가능 범위 표시에 사용할 타일 애셋
 
     void Awake()
     {
@@ -35,8 +38,13 @@ public class TileEffectManager : MonoBehaviour
         }
         effectTilemap.SetTile(targetCell, reconHighlightTile);
         Debug.Log($"{targetCell} 위치에 정찰 효과를 표시합니다.");
+    }
 
-        // 일정 시간 후에 타일을 다시 원래대로 돌리려면 코루틴을 사용할 수 있습니다.
-        // StartCoroutine(ClearTileAfterDelay(targetCell, 2f));
+    /// <summary>
+    /// 이펙트 타일맵의 모든 타일을 지웁니다.
+    /// </summary>
+    public void ClearAllEffectTiles()
+    {
+        effectTilemap.ClearAllTiles();
     }
 }
