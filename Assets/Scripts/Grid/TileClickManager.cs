@@ -189,6 +189,40 @@ public class TileClickManager : MonoBehaviour
             {
                 return;
             }
+
+            Vector3 worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector3Int clickedTile = gameGrid.WorldToCell(worldPos);
+            clickedTile.z = 0;
+
+            UnitInstance unit = gm.GetUnitAt(clickedTile);
+            if (unit != null)
+            {
+                // 현재 턴의 플레이어가 유닛의 소유자가 아니면 아무것도 하지 않음
+                if (unit.owner != gm.currentPlayer)
+                {
+                    Debug.Log($"상대방의 유닛({unit.sourceCardData.cardName})은 선택할 수 없습니다.");
+                    return;
+                }
+
+                // 게임 단계에 따라 다른 행동 수행
+                switch (gm.currentPhase)
+                {
+                    // 배치 단계: 유닛 이동 모드 진입
+                    case GameManager.GamePhase.Placement:
+                        gm.EnterMoveMode(unit);
+                        break;
+                    
+                    // 행동 단계: 스킬 사용을 위해 유닛 선택
+                    case GameManager.GamePhase.Action:
+                        gm.SelectUnit(unit);
+                        break;
+                }
+            }
+            else
+            {
+                // 빈 땅을 클릭하면 선택 해제
+                gm.DeselectUnit();
+            }
         }
     }
 }

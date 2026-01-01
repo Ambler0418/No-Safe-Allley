@@ -162,33 +162,5 @@ public class UnitInstance : MonoBehaviour
         Destroy(gameObject);
     }
 
-    void OnMouseDown()
-    {
-        var gm = GameManager.Instance;
-        
-        // 현재 턴의 플레이어가 유닛의 소유자가 아니면 아무것도 하지 않음
-        if (this.owner != gm.currentPlayer)
-        {
-            Debug.Log($"상대방의 유닛({sourceCardData.cardName})은 선택할 수 없습니다.");
-            return;
-        }
 
-        // 게임 단계에 따라 다른 행동 수행
-        switch (gm.currentPhase)
-        {
-            // 배치 단계: 유닛 이동 모드 진입
-            case GameManager.GamePhase.Placement:
-                gm.EnterMoveMode(this);
-                break;
-            
-            // 행동 단계: 스킬 사용을 위해 유닛 선택
-            case GameManager.GamePhase.Action:
-                gm.SelectUnit(this);
-                break;
-            
-            // 그 외 단계에서는 아무것도 하지 않음
-            default:
-                return;
-        }
-    }
 }

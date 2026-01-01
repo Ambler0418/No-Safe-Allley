@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 885672be77215ad4a956b12c68d4095e, type: 3}
+  m_Name: TestEncounter
+  m_EditorClassIdentifier: Assembly-CSharp::Map.BattleEncounter
+  encounterName: 
+  description: 
+  enemies:
+  - position: {x: -1, y: 9, z: 0}
+    enemyCard: {fileID: 11400000, guid: beb615bbb95f30d45b19724459696f70, type: 2}
+  - position: {x: 0, y: 9, z: 0}
+    enemyCard: {fileID: 11400000, guid: c9fafe27898a340469486f04b0f65afb, type: 2}
+  - position: {x: 2, y: 10, z: 0}
+    enemyCard: {fileID: 11400000, guid: 1fb898a09f4998a409e4b72c5ed6394e, type: 2}

@@ -111,6 +111,13 @@ public class HandManager : MonoBehaviour
             else
             {
                 Debug.Log("Deck is empty. Reshuffling from backup.");
+                
+                if (runtimeDeckBackup.Count == 0)
+                {
+                    Debug.LogError("Cannot reshuffle: Backup deck is also empty! Stopping draw.");
+                    break;
+                }
+
                 runtimeDeck = new List<CardData>(runtimeDeckBackup);
                 ShuffleDeck();
                 i--;

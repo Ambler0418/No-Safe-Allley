@@ -16,7 +16,7 @@ MonoBehaviour:
   cardType: 0
   description: 
   artwork: {fileID: 6667207742135527528, guid: 4dd8a40f898129641a1087317f39b9e0, type: 3}
-  unitSprite: {fileID: 0}
+  unitSprite: {fileID: -8231564302207419865, guid: 4df0a10638b643b4fba52ee2e284173b, type: 3}
   rarity: 2
   unitClass: 3
   maxHealth: 900

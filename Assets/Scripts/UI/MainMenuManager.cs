@@ -16,6 +16,10 @@ public class MainMenuManager : MonoBehaviour
     {
         SceneManager.LoadScene("Inventory");
     }
+    public void GoToCampaign()
+    {
+        SceneManager.LoadScene("Campaign");
+    }
     public void QuitGame()
     {
         // 에디터에서 테스트할 때와 실제 빌드에서 모두 작동하도록 처리합니다.

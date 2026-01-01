@@ -3,6 +3,7 @@ using System; // 이벤트를 위해 추가
 using System.Collections.Generic; // Dictionary 사용을 위해 추가
 using System.Collections; // 코루틴 사용을 위해 추가
 using System.Linq;       // Linq 사용을 위해 추가
+using Map; // BattleEncounter 사용을 위해 추가
 
 public class GameManager : MonoBehaviour
 {
@@ -11,6 +12,9 @@ public class GameManager : MonoBehaviour
 
     // 게임 단계 변경 시 발생하는 이벤트
     public event Action OnPhaseChanged;
+
+    // 현재 진행 중인 (또는 진행 예정인) 전투 데이터
+    public BattleEncounter currentEncounter;
 
     // 게임 단계 정의
     public enum GamePhase
@@ -128,24 +132,78 @@ public class GameManager : MonoBehaviour
     public void StartGame()
     {
         Debug.Log("===== Game Start! =====");
+        
+        // 씬 전환 후 Grid 참조가 끊겼을 수 있으므로 다시 찾습니다.
+        if (gameGrid == null)
+        {
+            if (PlacementManager.Instance != null && PlacementManager.Instance.gameGrid != null)
+            {
+                gameGrid = PlacementManager.Instance.gameGrid;
+            }
+            else
+            {
+                // PlacementManager가 아직 초기화되지 않았을 수도 있으므로 Find로 찾기 시도
+                GameObject gridObj = GameObject.Find("Grid"); // 씬에 Grid 이름의 오브젝트가 있다고 가정
+                if (gridObj != null) gameGrid = gridObj.GetComponent<Grid>();
+            }
+        }
+
         currentPlayer = Player.Player1;
         currentPhase = GamePhase.Preparation; // 이벤트 발생
         Debug.Log("Phase: Preparation - 유닛과 거점을 배치하세요.");
 
-        // --- 테스트 코드 호출 ---
-        SetupReconTest();
-        // ---------------------
+        // 전투 데이터가 있으면 그것으로 초기화, 없으면 기존 테스트 로직 실행
+        if (currentEncounter != null)
+        {
+            SetupEncounter();
+        }
+        else
+        {
+            Debug.LogWarning("설정된 Encounter가 없습니다. 테스트 모드로 실행합니다.");
+            SetupReconTest();
+        }
 
         // 여기에 초기 카드 7장 드로우 로직 추가 (HandManager 연동 필요)
-        // 예: HandManager.Instance.DrawInitialHand(7);
+        if (HandManager.Instance != null)
+        {
+            HandManager.Instance.DrawCards(7);
+        }
+    }
+
+    // --- 전투 인카운터 설정 ---
+    private void SetupEncounter()
+    {
+        if (currentEncounter == null) return;
+        
+        Debug.Log($"전투 초기화: {currentEncounter.encounterName}");
+        
+        foreach (var spawnInfo in currentEncounter.enemies)
+        {
+            if (spawnInfo.enemyCard != null)
+            {
+                // 적 유닛 생성 (Player2 소유)
+                // 좌표는 데이터에 정의된 대로 (적 진영 기준이라면 변환 필요할 수 있음)
+                SpawnEnemyUnitForTest(spawnInfo.enemyCard, spawnInfo.position);
+            }
+        }
     }
 
     // --- 테스트용 적 유닛 생성 ---
     private void SetupReconTest()
     {
-        if (boomCardData == null || PlacementManager.Instance == null || gameGrid == null)
+        if (boomCardData == null)
         {
-            Debug.LogWarning("테스트 유닛 생성에 필요한 데이터(Boom Card, PlacementManager, Grid)가 부족하여 스킵합니다.");
+            Debug.LogError("테스트 실패: Boom Card Data가 할당되지 않았습니다.");
+            return;
+        }
+        if (PlacementManager.Instance == null)
+        {
+            Debug.LogError("테스트 실패: PlacementManager가 씬에 없습니다.");
+            return;
+        }
+        if (gameGrid == null)
+        {
+            Debug.LogError("테스트 실패: Grid가 할당되지 않았습니다.");
             return;
         }
 

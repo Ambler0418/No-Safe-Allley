@@ -73,26 +73,26 @@ public class UIManager : MonoBehaviour
     {
         if (GameManager.Instance.selectedUnit == null) return;
 
-        UnitCard unitCard = GameManager.Instance.selectedUnit.sourceCardData as UnitCard;
-        if (unitCard == null) return;
+        UnitInstance selectedUnit = GameManager.Instance.selectedUnit;
+        SkillEffect activeSkill = selectedUnit.ActiveSkill;
 
-        // 새로운 로직: activeSkill이 있는지 확인하고 그 energyCost를 사용
-        if (unitCard.activeSkill != null)
+        // activeSkill이 있는지 확인하고 그 energyCost를 사용
+        if (activeSkill != null)
         {
             // 1. 에너지 확인
-            if (GameManager.Instance.HasEnoughEnergy(unitCard.activeSkill.energyCost))
+            if (GameManager.Instance.HasEnoughEnergy(activeSkill.energyCost))
             {
                 // 2. GameManager에 타겟팅 모드 진입 요청
                 GameManager.Instance.EnterSkillTargetingMode();
             }
             else
             {
-                Debug.LogWarning($"{unitCard.cardName} 스킬 사용 실패: 에너지가 부족합니다.");
+                Debug.LogWarning($"{selectedUnit.sourceCardData.cardName} 스킬 사용 실패: 에너지가 부족합니다.");
             }
         }
         else
         {
-            Debug.LogWarning($"{unitCard.cardName}은(는) 사용할 스킬이 없습니다.");
+            Debug.LogWarning($"{selectedUnit.sourceCardData.cardName}은(는) 사용할 스킬이 없습니다.");
         }
     }
 
@@ -164,36 +164,39 @@ public class UIManager : MonoBehaviour
         // 선택된 유닛이 있다면 패널 활성화
         selectedUnitPanel.SetActive(true);
 
-        // UnitCard 정보를 가져와 UI에 표시
-        UnitCard unitCard = gm.selectedUnit.sourceCardData as UnitCard;
-        if (unitCard != null && selectedUnitNameText != null && useSkillButtonText != null && useSkillButton != null)
-        {
-            selectedUnitNameText.text = unitCard.cardName;
+        UnitInstance selectedUnit = gm.selectedUnit;
+        
+        // UI 컴포넌트 유효성 검사
+        if (selectedUnitNameText == null || useSkillButtonText == null || useSkillButton == null) return;
 
-            // 스킬 사용 가능 여부에 따라 버튼 상태 변경
-            if (gm.selectedUnit.hasUsedSkillThisTurn)
+        // 이름 표시 (UnitCard, BaseCard 모두 sourceCardData에 cardName이 있음)
+        selectedUnitNameText.text = selectedUnit.sourceCardData.cardName;
+
+        SkillEffect activeSkill = selectedUnit.ActiveSkill;
+
+        // 스킬 사용 가능 여부에 따라 버튼 상태 변경
+        if (selectedUnit.hasUsedSkillThisTurn)
+        {
+            useSkillButton.interactable = false;
+            useSkillButtonText.text = "사용 완료";
+        }
+        else if (activeSkill != null) 
+        {
+            if (activeSkill.energyCost > 0) // 스킬이 있고, 에너지 비용이 0보다 크면
             {
-                useSkillButton.interactable = false;
-                useSkillButtonText.text = "사용 완료";
+                useSkillButton.interactable = true;
+                useSkillButtonText.text = $"스킬 ({activeSkill.energyCost})";
             }
-            else if (unitCard.activeSkill != null) // unitCard.activeSkill이 존재하는지 먼저 확인
+            else // 스킬이 있지만 에너지 비용이 0이거나 음수면 (무료 스킬)
             {
-                if (unitCard.activeSkill.energyCost > 0) // 스킬이 있고, 에너지 비용이 0보다 크면
-                {
-                    useSkillButton.interactable = true;
-                    useSkillButtonText.text = $"스킬 ({unitCard.activeSkill.energyCost})";
-                }
-                else // 스킬이 있지만 에너지 비용이 0이거나 음수면 (무료 스킬)
-                {
-                    useSkillButton.interactable = true; // 무료 스킬도 사용 가능하게
-                    useSkillButtonText.text = "스킬 (무료)";
-                }
+                useSkillButton.interactable = true; // 무료 스킬도 사용 가능하게
+                useSkillButtonText.text = "스킬 (무료)";
             }
-            else // activeSkill이 null이면 스킬 없음
-            {
-                useSkillButton.interactable = false;
-                useSkillButtonText.text = "스킬 없음";
-            }
+        }
+        else // activeSkill이 null이면 스킬 없음
+        {
+            useSkillButton.interactable = false;
+            useSkillButtonText.text = "스킬 없음";
         }
     }
 }
