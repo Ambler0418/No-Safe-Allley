@@ -104,9 +104,7 @@ public class HandManager : MonoBehaviour
                 CardData drawnCard = runtimeDeck[0];
                 runtimeDeck.RemoveAt(0);
 
-                UICard newCard = Instantiate(uiCardPrefab, handPanelTransform);
-                newCard.Initialize(drawnCard);
-                cardsInHand.Add(newCard);
+                AddCardToHand(drawnCard);
             }
             else
             {
@@ -124,6 +122,48 @@ public class HandManager : MonoBehaviour
             }
         }
         UpdateHandLayout();
+    }
+
+    /// <summary>
+    /// 덱에서 특정 진영의 카드를 검색하여 UI를 통해 선택한 뒤 패로 가져옵니다.
+    /// </summary>
+    public void SearchCardByFaction(Enums.Faction targetFaction)
+    {
+        Debug.Log($"[Search] 서치 시작. 대상 진영: {targetFaction}, 현재 덱 잔량: {runtimeDeck.Count}");
+        
+        List<CardData> matchingCards = new List<CardData>();
+        foreach (var card in runtimeDeck)
+        {
+            if (card.faction == targetFaction)
+            {
+                matchingCards.Add(card);
+            }
+        }
+
+        Debug.Log($"[Search] 검색 완료. 일치하는 카드: {matchingCards.Count}장");
+
+        if (matchingCards.Count > 0)
+        {
+            // 서치 UI 오픈
+            SearchUIManager.Instance.OpenSearchPanel(matchingCards, (selectedCard) => {
+                // 콜백: 플레이어가 선택한 카드 처리
+                runtimeDeck.Remove(selectedCard);
+                AddCardToHand(selectedCard);
+                UpdateHandLayout();
+                Debug.Log($"[Search] '{selectedCard.cardName}'을(를) 선택하여 패로 가져왔습니다.");
+            });
+        }
+        else
+        {
+            Debug.LogWarning($"[Search] {targetFaction} 진영의 카드가 덱에 없습니다.");
+        }
+    }
+
+    private void AddCardToHand(CardData data)
+    {
+        UICard newCard = Instantiate(uiCardPrefab, handPanelTransform);
+        newCard.Initialize(data);
+        cardsInHand.Add(newCard);
     }
     
     public void RemoveCardFromHand(UICard card)

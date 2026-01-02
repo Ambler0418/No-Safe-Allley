@@ -104,7 +104,7 @@ public class TileClickManager : MonoBehaviour
                     isSkillHoverTileSet = false;
                 }
                 
-                SkillEffect skillToUse = gm.skillCaster?.ActiveSkill;
+                SkillEffect skillToUse = gm.currentSkillToUse; // gm.skillCaster?.ActiveSkill 대신 사용
                 if (skillToUse != null)
                 {
                     bool isValidHover = false;
@@ -119,7 +119,7 @@ public class TileClickManager : MonoBehaviour
 
                     if (isValidHover)
                     {
-                        tem.effectTilemap.SetTile(currentHoverTile, tem.moveHighlightTile); // 요청대로 recon이 아닌 move 타일 사용
+                        tem.effectTilemap.SetTile(currentHoverTile, tem.moveHighlightTile); 
                         isSkillHoverTileSet = true;
                     }
                 }
@@ -138,7 +138,7 @@ public class TileClickManager : MonoBehaviour
             if (Input.GetMouseButtonDown(0))
             {
                 UnitInstance caster = gm.skillCaster;
-                SkillEffect skillToUse = caster?.ActiveSkill;
+                SkillEffect skillToUse = gm.currentSkillToUse; // caster?.ActiveSkill 대신 사용
 
                 if (skillToUse != null)
                 {
@@ -152,12 +152,29 @@ public class TileClickManager : MonoBehaviour
                     else // Enemy
                     {
                         isValidTile = enemyTilemap.HasTile(currentHoverTile);
+
+                        // 💥 도발(Provoked) 체크 추가 💥
+                        if (isValidTile && caster.HasStatus(Enums.StatusType.Provoked))
+                        {
+                            // 시전자에게 걸린 도발 효과 찾기
+                            StatusEffect provocation = caster.activeStatuses.Find(s => s.type == Enums.StatusType.Provoked);
+                            if (provocation != null && provocation.creator != null)
+                            {
+                                // 도발 시전자의 위치와 클릭한 위치가 다르면 무효
+                                if (currentHoverTile != provocation.creator.location)
+                                {
+                                    Debug.Log($"도발 효과로 인해 {provocation.creator.sourceCardData.cardName}만 공격할 수 있습니다!");
+                                    isValidTile = false;
+                                }
+                            }
+                        }
                     }
 
                     if (isValidTile)
                     {
                         // 유효한 타일이면 유닛 존재 여부와 관계없이 스킬 발동 및 에너지 소모
-                        if (gm.SpendEnergy(skillToUse.energyCost))
+                        int finalCost = caster.GetSkillCost(skillToUse);
+                        if (gm.SpendEnergy(finalCost))
                         {
                             caster.hasUsedSkillThisTurn = true;
                             skillToUse.Execute(caster, currentHoverTile);

@@ -20,8 +20,19 @@ public class UIManager : MonoBehaviour
     [Header("Selected Unit UI")]
     public GameObject selectedUnitPanel; // 유닛 선택 시 활성화될 패널
     public TextMeshProUGUI selectedUnitNameText; // 선택된 유닛 이름
+    
+    // --- 추가된 상세 정보 UI ---
+    public TextMeshProUGUI selectedUnitHPText;
+    public TextMeshProUGUI selectedUnitAttackText;
+    public TextMeshProUGUI selectedUnitDefenseText;
+    public TextMeshProUGUI selectedUnitBuffsText; // 버프/디버프 목록 텍스트
+    // -------------------------
+
     public Button useSkillButton; // 스킬 사용 버튼
     public TextMeshProUGUI useSkillButtonText; // 스킬 버튼 텍스트 (비용 표시 등)
+
+    public Button useConditionalSkillButton; // 조건부 스킬 버튼
+    public TextMeshProUGUI useConditionalSkillButtonText;
 
     void Start()
     {
@@ -29,7 +40,7 @@ public class UIManager : MonoBehaviour
         if (myTurnButton != null) myTurnButton.onClick.AddListener(OnMyTurnButtonClicked);
         if (enemyTurnButton != null) enemyTurnButton.onClick.AddListener(OnEnemyTurnButtonClicked);
         if (useSkillButton != null) useSkillButton.onClick.AddListener(OnUseSkillButtonClicked);
-        else Debug.LogError("UIManager의 'Use Skill Button'이 Inspector에 연결되지 않았습니다!");
+        if (useConditionalSkillButton != null) useConditionalSkillButton.onClick.AddListener(OnUseConditionalSkillButtonClicked);
     }
 
     void Update()
@@ -71,28 +82,35 @@ public class UIManager : MonoBehaviour
     // '스킬 사용' 버튼 클릭 시
     private void OnUseSkillButtonClicked()
     {
+        HandleSkillClick(false);
+    }
+
+    // '조건부 스킬 사용' 버튼 클릭 시
+    private void OnUseConditionalSkillButtonClicked()
+    {
+        HandleSkillClick(true);
+    }
+
+    private void HandleSkillClick(bool isConditional)
+    {
         if (GameManager.Instance.selectedUnit == null) return;
 
         UnitInstance selectedUnit = GameManager.Instance.selectedUnit;
-        SkillEffect activeSkill = selectedUnit.ActiveSkill;
+        SkillEffect skillToUse = isConditional ? selectedUnit.ConditionalSkill : selectedUnit.ActiveSkill;
 
-        // activeSkill이 있는지 확인하고 그 energyCost를 사용
-        if (activeSkill != null)
+        if (skillToUse != null)
         {
-            // 1. 에너지 확인
-            if (GameManager.Instance.HasEnoughEnergy(activeSkill.energyCost))
+            // 에너지 확인 (GetSkillCost 반영)
+            if (GameManager.Instance.HasEnoughEnergy(selectedUnit.GetSkillCost(skillToUse)))
             {
-                // 2. GameManager에 타겟팅 모드 진입 요청
+                // GameManager에 스킬 정보 전달 및 타겟팅 모드 진입
+                GameManager.Instance.currentSkillToUse = skillToUse;
                 GameManager.Instance.EnterSkillTargetingMode();
             }
             else
             {
                 Debug.LogWarning($"{selectedUnit.sourceCardData.cardName} 스킬 사용 실패: 에너지가 부족합니다.");
             }
-        }
-        else
-        {
-            Debug.LogWarning($"{selectedUnit.sourceCardData.cardName}은(는) 사용할 스킬이 없습니다.");
         }
     }
 
@@ -166,37 +184,92 @@ public class UIManager : MonoBehaviour
 
         UnitInstance selectedUnit = gm.selectedUnit;
         
-        // UI 컴포넌트 유효성 검사
-        if (selectedUnitNameText == null || useSkillButtonText == null || useSkillButton == null) return;
-
-        // 이름 표시 (UnitCard, BaseCard 모두 sourceCardData에 cardName이 있음)
-        selectedUnitNameText.text = selectedUnit.sourceCardData.cardName;
-
-        SkillEffect activeSkill = selectedUnit.ActiveSkill;
-
-        // 스킬 사용 가능 여부에 따라 버튼 상태 변경
-        if (selectedUnit.hasUsedSkillThisTurn)
+        // UI 컴포넌트 유효성 검사 (Text 컴포넌트는 null일 수도 있으므로 체크)
+        if (selectedUnitNameText != null) selectedUnitNameText.text = selectedUnit.sourceCardData.cardName;
+        
+        // --- 추가된 상세 정보 업데이트 ---
+        if (selectedUnitHPText != null) selectedUnitHPText.text = $"HP: {selectedUnit.currentHealth} / {selectedUnit.maxHealth}";
+        if(selectedUnit.sourceCardData is UnitCard unitData)
         {
-            useSkillButton.interactable = false;
-            useSkillButtonText.text = "사용 완료";
+            if (selectedUnitAttackText != null) selectedUnitAttackText.text = $"ATK: {unitData.attack}";
+            if (selectedUnitDefenseText != null) selectedUnitDefenseText.text = $"DEF: {unitData.defense}";
         }
-        else if (activeSkill != null) 
+        else
         {
-            if (activeSkill.energyCost > 0) // 스킬이 있고, 에너지 비용이 0보다 크면
+            if (selectedUnitAttackText != null) selectedUnitAttackText.text = "";
+            if (selectedUnitDefenseText != null) selectedUnitDefenseText.text = "";
+        }
+
+        if (selectedUnitBuffsText != null)
+        {
+            if (selectedUnit.activeStatuses.Count > 0)
             {
+                string buffs = "";
+                foreach (var status in selectedUnit.activeStatuses)
+                {
+                    buffs += $"{status.type}({status.value}) {status.remainingTurns}턴\n";
+                }
+                selectedUnitBuffsText.text = buffs;
+            }
+            else
+            {
+                selectedUnitBuffsText.text = "상태 이상 없음";
+            }
+        }
+        // -------------------------
+
+        // --- 스킬 1 버튼 업데이트 ---
+        SkillEffect skill1 = selectedUnit.ActiveSkill;
+        if (useSkillButton != null && useSkillButtonText != null)
+        {
+            if (selectedUnit.hasUsedSkillThisTurn)
+            {
+                useSkillButton.interactable = false;
+                useSkillButtonText.text = "사용 완료";
+            }
+            else if (skill1 != null) 
+            {
+                int finalCost = selectedUnit.GetSkillCost(skill1);
                 useSkillButton.interactable = true;
-                useSkillButtonText.text = $"스킬 ({activeSkill.energyCost})";
+                useSkillButtonText.text = finalCost > 0 ? $"{skill1.skillName} ({finalCost})" : $"{skill1.skillName} (무료)";
             }
-            else // 스킬이 있지만 에너지 비용이 0이거나 음수면 (무료 스킬)
+            else 
             {
-                useSkillButton.interactable = true; // 무료 스킬도 사용 가능하게
-                useSkillButtonText.text = "스킬 (무료)";
+                useSkillButton.interactable = false;
+                useSkillButtonText.text = "스킬 없음";
             }
         }
-        else // activeSkill이 null이면 스킬 없음
+
+        // --- 스킬 2 (조건부) 버튼 업데이트 ---
+        SkillEffect skill2 = selectedUnit.ConditionalSkill;
+        if (useConditionalSkillButton != null && useConditionalSkillButtonText != null)
         {
-            useSkillButton.interactable = false;
-            useSkillButtonText.text = "스킬 없음";
+            if (skill2 == null)
+            {
+                useConditionalSkillButton.gameObject.SetActive(false);
+            }
+            else
+            {
+                useConditionalSkillButton.gameObject.SetActive(true);
+                bool canUse = selectedUnit.CanUseConditionalSkill();
+                int finalCost = selectedUnit.GetSkillCost(skill2);
+
+                if (selectedUnit.hasUsedSkillThisTurn)
+                {
+                    useConditionalSkillButton.interactable = false;
+                    useConditionalSkillButtonText.text = "사용 완료";
+                }
+                else if (canUse)
+                {
+                    useConditionalSkillButton.interactable = true;
+                    useConditionalSkillButtonText.text = finalCost > 0 ? $"{skill2.skillName} ({finalCost})" : $"{skill2.skillName} (무료)";
+                }
+                else
+                {
+                    useConditionalSkillButton.interactable = false;
+                    useConditionalSkillButtonText.text = "조건 미충족";
+                }
+            }
         }
     }
 }

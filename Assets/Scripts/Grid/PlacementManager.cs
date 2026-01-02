@@ -97,9 +97,9 @@ public bool TryPlaceCard(CardData card, Vector3 worldPosition)
             Debug.Log($"[Tactics Card] '{card.cardName}' 사용. 에너지 {skillToUse.energyCost} 소모.");
 
             // 2. 스킬 효과 발동
-            // 전술 카드는 필드 위 유닛이 시전하는 것이 아니므로 caster는 null,
-            // 타겟이 없는 스킬이므로 primaryTarget은 임의의 값(zero)을 넘겨줍니다.
-            skillToUse.Execute(null, Vector3Int.zero);
+            // 전술 카드는 필드 위 유닛이 시전하는 것이 아니므로 caster는 null입니다.
+            // 타겟 타일은 카드를 내려놓은 위치(cellLocation)를 전달합니다.
+            skillToUse.Execute(null, cellLocation);
 
             return true; // 사용 성공 -> 카드 파괴
         }

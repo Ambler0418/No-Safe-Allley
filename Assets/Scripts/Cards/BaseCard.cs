@@ -11,5 +11,6 @@ public class BaseCard : CardData // CardData를 상속받음
     [Header("Base Placement Image")]
     public Sprite unitSprite; 
 
-    public SkillEffect activeSkill;
+    [Header("Skill")]
+    public PassiveSkill passiveSkill;
 }

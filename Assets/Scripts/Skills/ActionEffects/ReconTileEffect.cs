@@ -6,9 +6,12 @@ public class ReconTileEffect : ActionEffect
     public override void Apply(UnitInstance caster, Vector3Int targetTile)
     {
         UnitInstance targetUnit = GameManager.Instance.GetUnitAt(targetTile);
+        
+        // 시전자 소유자 확인 (전술 카드인 경우 현재 플레이어)
+        GameManager.Player casterOwner = (caster != null) ? caster.owner : GameManager.Instance.currentPlayer;
 
         // 해당 타일에 적 유닛이 있고, 그 유닛이 현재 보이지 않는 상태라면
-        if (targetUnit != null && targetUnit.owner != caster.owner && !targetUnit.IsVisible)
+        if (targetUnit != null && targetUnit.owner != casterOwner && !targetUnit.IsVisible)
         {
             // 모습을 보이게 하고 타일을 강조표시합니다.
             TileEffectManager.Instance.HighlightReconTile(targetTile);

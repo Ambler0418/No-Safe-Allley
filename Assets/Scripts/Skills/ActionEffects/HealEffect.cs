@@ -9,12 +9,15 @@ public class HealEffect : ActionEffect
     {
         UnitInstance targetUnit = GameManager.Instance.GetUnitAt(targetTile);
 
-        // 해당 타일에 적 유닛이 있고, 그 유닛이 현재 보이지 않는 상태라면
-        if (targetUnit != null && targetUnit.owner == caster.owner)
+        // 시전자 소유자 확인 (전술 카드인 경우 현재 플레이어)
+        GameManager.Player casterOwner = (caster != null) ? caster.owner : GameManager.Instance.currentPlayer;
+        string casterName = (caster != null) ? caster.sourceCardData.cardName : "전술 카드";
+
+        // 해당 타일에 아군 유닛이 있다면
+        if (targetUnit != null && targetUnit.owner == casterOwner)
         {
-            // 모습을 보이게 하고 타일을 강조표시합니다.
             targetUnit.heal(healAmount);
-            Debug.Log($"{caster.sourceCardData.cardName}이(가) {targetUnit.sourceCardData.cardName}을(를) {healAmount}만큼 회복시켰습니다.");
+            Debug.Log($"{casterName}이(가) {targetUnit.sourceCardData.cardName}을(를) {healAmount}만큼 회복시켰습니다.");
         }
     }
 }

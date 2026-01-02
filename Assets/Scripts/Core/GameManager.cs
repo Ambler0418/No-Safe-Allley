@@ -55,6 +55,7 @@ public class GameManager : MonoBehaviour
     [Header("Selection State")]
     public UnitInstance selectedUnit; // 현재 선택된 유닛
     public bool isTargetingSkill = false; // 스킬 대상 지정 모드 여부
+    public SkillEffect currentSkillToUse; // 현재 사용 중인 스킬 (추가)
     public UnitInstance skillCaster; // 현재 스킬을 사용하려는 유닛
     public bool isMovingUnit = false; // 유닛 이동 모드 여부
     public UnitInstance unitToMove = null; // 현재 이동하려는 유닛
@@ -73,6 +74,8 @@ public class GameManager : MonoBehaviour
     public int player1Energy = 100;
     public int player2Energy = 100;
 
+    [Header("Combat Tracking")]
+    public int deadEnemyCount = 0; // 사망한 적 유닛 수 (I004 스킬용)
 
     void Awake()
     {
@@ -116,10 +119,56 @@ public class GameManager : MonoBehaviour
         }
     }
 
+        public void NotifyUnitDeath(UnitInstance deadUnit)
+        {
+            // 적 유닛이 사망한 경우 카운트 증가 (플레이어가 Player1이라고 가정)
+            if (deadUnit.owner == Player.Player2 && deadUnit.sourceCardData is UnitCard)
+            {
+                deadEnemyCount++;
+                Debug.Log($"적 유닛 사망 카운트 증가: {deadEnemyCount}");
+            }
+    
+            // 모든 유닛의 패시브 스킬에 사망 이벤트 전파        // 컬렉션 변경 오류 방지를 위해 리스트 복사 후 순회
+        List<UnitInstance> units = new List<UnitInstance>(unitRegistry.Values);
+        foreach (var unit in units)
+        {
+            if (unit != null && unit.gameObject.activeInHierarchy) // 파괴되지 않은 유닛만
+            {
+                // UnitInstance에 HandlePassiveUnitDeath 메서드를 추가하여 호출하는 것이 깔끔함
+                // 하지만 여기서는 직접 접근 (UnitInstance 수정 최소화)
+                if (unit.sourceCardData is BaseCard baseCard && baseCard.passiveSkill != null)
+                {
+                    baseCard.passiveSkill.OnUnitDied(unit, deadUnit);
+                }
+            }
+        }
+    }
+
+    public void ResetDeadEnemyCount()
+    {
+        deadEnemyCount = 0;
+        Debug.Log("적 유닛 사망 카운트가 초기화되었습니다.");
+    }
+
     public UnitInstance GetUnitAt(Vector3Int position)
     {
         unitRegistry.TryGetValue(position, out UnitInstance unit);
         return unit;
+    }
+
+    /// <summary>
+    /// 해당 플레이어의 유닛이 필드에 존재하는지 확인합니다.
+    /// </summary>
+    public bool HasUnits(Player player)
+    {
+        foreach (var unit in unitRegistry.Values)
+        {
+            if (unit.owner == player)
+            {
+                return true;
+            }
+        }
+        return false;
     }
     
     void Start()
@@ -254,12 +303,12 @@ public class GameManager : MonoBehaviour
         placementActionsTaken = 0; // 턴 시작 시 배치 행동 횟수 초기화
         DeselectUnit(); // 턴 시작 시 유닛 선택 해제
 
-        // 모든 아군 유닛의 '스킬 사용' 상태를 초기화
+        // 턴 시작 처리 (상태 이상 갱신, 패시브 발동, 행동력 초기화)
         foreach (var unit in unitRegistry.Values)
         {
             if (unit.owner == currentPlayer)
             {
-                unit.hasUsedSkillThisTurn = false;
+                unit.OnTurnStart();
             }
         }
 
@@ -536,6 +585,15 @@ public class GameManager : MonoBehaviour
     private IEnumerator ExecuteEnemyTurn()
     {
         Debug.Log("===== Enemy's Turn Starts =====");
+
+        // 적 유닛 턴 시작 처리 (상태 이상 갱신, 패시브 발동)
+        foreach (var unit in unitRegistry.Values)
+        {
+            if (unit.owner == Player.Player2)
+            {
+                unit.OnTurnStart();
+            }
+        }
 
         // 1초 대기 (플레이어가 상황을 인지할 시간)
         yield return new WaitForSeconds(1.0f);
