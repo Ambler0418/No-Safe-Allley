@@ -5,7 +5,7 @@ public class AddPlacementActionEffect : ActionEffect
 {
     public int amount = 1;
 
-    public override void Apply(UnitInstance caster, Vector3Int targetTile)
+    public override bool Apply(UnitInstance caster, Vector3Int targetTile)
     {
         // GameManager의 배치 행동 횟수 조정
         if (GameManager.Instance.currentPhase == GameManager.GamePhase.Placement)
@@ -14,11 +14,13 @@ public class AddPlacementActionEffect : ActionEffect
             if (GameManager.Instance.placementActionsTaken < 0) GameManager.Instance.placementActionsTaken = 0;
             
             Debug.Log($"[Tactics] 배치 행동 횟수가 {amount}회 추가되었습니다.");
+            return true;
         }
         else
         {
             Debug.LogWarning("배치 단계가 아니므로 배치 행동을 추가할 수 없습니다.");
             // 에너지를 환불해주는 로직이 필요할 수도 있음.
+            return false;
         }
     }
 }

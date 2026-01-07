@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UnitCard
   cardName: "\uB124\uD06C\uB85C\uD544\uB9AC\uC544"
   cardType: 0
+  faction: 2
   description: 
   artwork: {fileID: 2829606559142220587, guid: fb19c799d0ae2184cb65a789dfb8a3d9, type: 3}
   unitSprite: {fileID: 3756282102072125371, guid: 14b4a809ea952ee44aed2d299c613cca, type: 3}
@@ -22,6 +23,6 @@ MonoBehaviour:
   maxHealth: 1100
   attack: 100
   defense: 420
-  activeSkill: {fileID: 0}
-  conditionalSkill: {fileID: 0}
-  conditionalSkillCondition: 
+  activeSkill: {fileID: 11400000, guid: f609541d9b120b7458a27f806f1008b7, type: 2}
+  conditionalSkill: {fileID: 11400000, guid: 663f254cfccf87141a0c75568e79263d, type: 2}
+  conditionalSkillCondition: DeadEnemies_3

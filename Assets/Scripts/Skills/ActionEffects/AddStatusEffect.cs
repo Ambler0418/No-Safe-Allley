@@ -4,6 +4,7 @@ using UnityEngine;
 public class AddStatusEffect : ActionEffect
 {
     [Header("Status To Apply")]
+    public string statusName;  // 표시될 이름 (예: [소화])
     public Enums.StatusType statusType;
     public int value;          // 버프/디버프 수치
     public int duration;       // 지속 시간 (턴)
@@ -11,8 +12,9 @@ public class AddStatusEffect : ActionEffect
     
     [Header("Targeting")]
     public bool applyToSelf = false; // true면 타겟 대신 시전자에게 적용
+    public bool onlyIfVisible = false; // true면 발각된 유닛에게만 적용 (F005용)
 
-    public override void Apply(UnitInstance caster, Vector3Int targetTile)
+    public override bool Apply(UnitInstance caster, Vector3Int targetTile)
     {
         UnitInstance targetUnit;
 
@@ -21,7 +23,7 @@ public class AddStatusEffect : ActionEffect
             if (caster == null)
             {
                 Debug.LogWarning("[AddStatusEffect] 시전자(caster)가 없어 'applyToSelf'를 적용할 수 없습니다. (전술 카드인 경우)");
-                return;
+                return false;
             }
             targetUnit = caster;
         }
@@ -32,14 +34,23 @@ public class AddStatusEffect : ActionEffect
 
         if (targetUnit != null)
         {
-            // 새로운 상태 이상 객체 생성 (시전자 정보 포함)
-            StatusEffect newStatus = new StatusEffect(statusType, value, duration, isPermanent, caster);
+            // F005: 노출되지 않은 유닛에게는 부여 불가 처리
+            if (onlyIfVisible && !targetUnit.isRevealed)
+            {
+                Debug.Log($"[AddStatusEffect] {targetUnit.sourceCardData.cardName}이(가) 숨겨져 있어 효과를 부여하지 못했습니다.");
+                return false;
+            }
+
+            // 새로운 상태 이상 객체 생성 (시전자 정보 및 이름 포함)
+            StatusEffect newStatus = new StatusEffect(statusName, statusType, value, duration, isPermanent, caster);
             targetUnit.AddStatus(newStatus);
-            Debug.Log($"[AddStatusEffect] {targetUnit.sourceCardData.cardName}에게 {statusType} (Val:{value}) 효과를 {duration}턴 동안 부여했습니다.");
+            Debug.Log($"[AddStatusEffect] {targetUnit.sourceCardData.cardName}에게 {statusName}({statusType}) 효과를 {duration}턴 동안 부여했습니다.");
+            return true;
         }
         else
         {
             Debug.LogWarning($"[AddStatusEffect] 대상이 유효하지 않습니다. (Tile: {targetTile}, Self: {applyToSelf})");
+            return false;
         }
     }
 }

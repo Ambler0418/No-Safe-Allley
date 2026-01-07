@@ -8,7 +8,7 @@ public class AdjacentScalingDamageEffect : DealDamageEffect
     public Enums.Faction targetFaction = Enums.Faction.Government;
     public bool useFactionCheck = false;
 
-    public override void Apply(UnitInstance caster, Vector3Int targetTile)
+    public override bool Apply(UnitInstance caster, Vector3Int targetTile)
     {
         Debug.Log($"[AdjacentScalingDamage] Apply 시작. Caster: {caster.sourceCardData.cardName}, TargetTile: {targetTile}");
 
@@ -16,7 +16,7 @@ public class AdjacentScalingDamageEffect : DealDamageEffect
         if (caster == null)
         {
             Debug.LogError("[AdjacentScalingDamageEffect] 시전자(caster)가 없습니다.");
-            return;
+            return false;
         }
 
         // 1. 인접 아군 수 계산
@@ -26,6 +26,7 @@ public class AdjacentScalingDamageEffect : DealDamageEffect
         if (grid == null)
         {
             Debug.LogError("[AdjacentScalingDamageEffect] GameManager의 gameGrid가 Null입니다! 거리 계산을 할 수 없습니다.");
+            return false;
         }
         else
         {
@@ -54,9 +55,11 @@ public class AdjacentScalingDamageEffect : DealDamageEffect
         Debug.Log($"[Scaling Damage] 인접 아군 {adjacentAllies}명 발견. 최종 계수: {attackCoefficient}. base.Apply 호출합니다.");
 
         // 3. 부모 클래스의 Apply 호출 (실제 데미지 적용 및 로그 출력)
-        base.Apply(caster, targetTile);
+        bool result = base.Apply(caster, targetTile);
 
         // 4. 계수 원상 복구
         attackCoefficient = originalCoefficient;
+
+        return result;
     }
 }

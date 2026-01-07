@@ -6,14 +6,17 @@ public class DealDamageEffect : ActionEffect
     [Header("Damage Calculation")]
     [Range(0.1f, 5.0f)] // 공격 계수 범위를 적절히 조절 (예: 0.1배 ~ 5배)
     public float attackCoefficient = 1.0f; // 공격력에 곱해질 계수 (예: 1.0f = 공격력의 100%)
+    
+    [Header("Condition")]
+    public bool onlyIfVisible = false; // 공개된 적에게만 데미지
 
-    public override void Apply(UnitInstance caster, Vector3Int targetTile)
+    public override bool Apply(UnitInstance caster, Vector3Int targetTile)
     {
         // 전술 카드로 데미지를 주려고 할 때 caster가 null인 경우 처리
         if (caster == null)
         {
             Debug.LogError("[DealDamageEffect] 시전자(caster)가 없습니다. 전술 카드는 'DealDamageEffect'를 직접 사용할 수 없습니다. (고정 데미지 효과 필요)");
-            return;
+            return false;
         }
 
         UnitInstance targetUnit = GameManager.Instance.GetUnitAt(targetTile);
@@ -21,6 +24,7 @@ public class DealDamageEffect : ActionEffect
         // 유닛이 존재하고, 스킬 시전자와 다른 소유자일 경우에만 데미지 적용
         if (targetUnit != null && targetUnit.owner != caster.owner)
         {
+
             int atk = caster.Attack;
             float coeff = attackCoefficient;
             float dealtMult = caster.DamageDealtMultiplier;
@@ -44,12 +48,17 @@ public class DealDamageEffect : ActionEffect
             else
             {
                 Debug.Log($"{targetUnit.sourceCardData.cardName}은 데미지를 입지 않았습니다 (최종 데미지 0).");
-                targetUnit.IsVisible = true;
+                targetUnit.isIdentified = true;
             }
+            
+
+
+            return true;
         }
         else
         {
             Debug.Log($"대상 타일 ({targetTile})에 유효한 적 유닛이 없습니다.");
+            return false;
         }
     }
 

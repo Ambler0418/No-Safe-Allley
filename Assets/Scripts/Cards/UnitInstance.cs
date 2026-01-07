@@ -166,7 +166,7 @@ public class UnitInstance : MonoBehaviour
             // G004: 인접 아군 4명 이상
             if (condition == "AdjacentAllies_4")
             {
-                return GetAdjacentAllyCount() >= 4;
+                return GetAdjacentGovernmentAllyCount() >= 4;
             }
             // I004: 사망한 적 유닛 3기 이상
             if (condition == "DeadEnemies_3")
@@ -182,25 +182,45 @@ public class UnitInstance : MonoBehaviour
         return false;
     }
 
-    private int GetAdjacentAllyCount()
+    /// <summary>
+    /// 인접한 아군 중 '정부' 진영 유닛의 수를 반환합니다. (G004 조건부 스킬용)
+    /// </summary>
+    private int GetAdjacentGovernmentAllyCount()
     {
         int count = 0;
-        Grid grid = GameManager.Instance.gameGrid;
-        if (grid == null) return 0;
-
         foreach (var unit in GameManager.Instance.unitRegistry.Values)
         {
-            if (unit != this && unit.owner == this.owner)
+            if (unit != this && unit.owner == this.owner && unit.Faction == Enums.Faction.Government)
             {
-                Vector3 worldPos1 = grid.GetCellCenterWorld(this.location);
-                Vector3 worldPos2 = grid.GetCellCenterWorld(unit.location);
-                if (Vector3.Distance(worldPos1, worldPos2) < 1.5f * grid.cellSize.x)
+                if (IsAdjacent(this.location, unit.location))
                 {
                     count++;
                 }
             }
         }
         return count;
+    }
+
+    private bool IsAdjacent(Vector3Int pos1, Vector3Int pos2)
+    {
+        if (pos1 == pos2) return false;
+        if (pos1.y % 2 == 0) // 짝수 행
+        {
+            int dx = pos2.x - pos1.x;
+            int dy = pos2.y - pos1.y;
+            if (dy == 1) return dx == -1 || dx == 0;
+            if (dy == 0) return dx == 1 || dx == -1;
+            if (dy == -1) return dx == 0 || dx == -1;
+        }
+        else // 홀수 행
+        {
+            int dx = pos2.x - pos1.x;
+            int dy = pos2.y - pos1.y;
+            if (dy == 1) return dx == 0 || dx == 1;
+            if (dy == 0) return dx == 1 || dx == -1;
+            if (dy == -1) return dx == 1 || dx == 0;
+        }
+        return false;
     }
 
     private int GetTotalEnemyCount()
@@ -218,22 +238,47 @@ public class UnitInstance : MonoBehaviour
 
     // 내부 컴포넌트 및 상태
     private SpriteRenderer spriteRenderer;
-    private bool _isVisible = true;
+    private bool _isRevealed = false; // 기본은 은신
+    private bool _isIdentified = false; // 정보 식별 여부
+
+    [Header("Visibility Flags")]
+    public bool isTracking = false; // [매의 눈] 상태: 이동 시 즉시 노출됨
 
     // 유닛의 가시성 프로퍼티
-    public bool IsVisible
+    public bool isRevealed
     {
-        get { return _isVisible; }
+        get { return _isRevealed; }
+        set 
+        { 
+            if (_isRevealed != value)
+            {
+                _isRevealed = value;
+                Debug.Log($"[Visibility] {sourceCardData.cardName} 위치 노출 상태: {_isRevealed}");
+            }
+        }
+    }
+
+    public bool isIdentified
+    {
+        get { return _isIdentified; }
         set
         {
-            _isVisible = value;
+            if (_isIdentified != value)
+            {
+                _isIdentified = value;
+                Debug.Log($"[Visibility] {sourceCardData.cardName} 정보 식별 상태: {_isIdentified}");
+            }
+            
+            // 내 유닛(Player1)이거나, 정보가 식별된 상태면 필드에서 보임
+            bool shouldBeVisible = _isIdentified || (owner == GameManager.Player.Player1);
+            
             if (spriteRenderer != null)
             {
-                spriteRenderer.enabled = _isVisible;
+                spriteRenderer.enabled = shouldBeVisible;
             }
             if (HealthBarCanvas != null)
             {
-                HealthBarCanvas.enabled = _isVisible;
+                HealthBarCanvas.enabled = shouldBeVisible;
             }
         }
     }
@@ -251,9 +296,10 @@ public class UnitInstance : MonoBehaviour
     }
 
     // UnitCard와 BaseCard 모두를 초기화하기 위해 CardData를 매개변수로 받습니다.
-    public void Initialize(CardData data)
+    public void Initialize(CardData data, GameManager.Player owner)
     {
         sourceCardData = data;
+        this.owner = owner; // 소유자 설정
         
         // 데이터 타입에 따라 초기 체력 설정
         if (data is UnitCard unitData)
@@ -273,8 +319,12 @@ public class UnitInstance : MonoBehaviour
             Debug.LogError($"[UnitInstance] 알 수 없는 카드 타입으로 초기화 시도: {data.cardName}");
             currentHealth = 1; // 안전 값
         }
+        
+        // 모든 유닛은 처음에는 미식별(은신) 상태로 시작
+        isIdentified = false;
+        isRevealed = false;
+
         healthBar.updateHealthBar(currentHealth, maxHealth);
-        IsVisible = _isVisible;
     }
 
     // 체력을 직접 수정하고 UI를 갱신하는 공통 메서드
@@ -296,59 +346,91 @@ public class UnitInstance : MonoBehaviour
         }
     }
 
-    // 예시: 데미지를 입는 함수
-    public void TakeDamage(int damage)
-    {
-        // 배리어 체크: 인접한 아군 중 BarrierPassive를 가진 유닛이 있는지 확인
-        UnitInstance barrierUnit = GetBarrierProvider();
-        if (barrierUnit != null)
-        {
-            Debug.Log($"{sourceCardData.cardName}이(가) 받을 데미지 {damage}를 {barrierUnit.sourceCardData.cardName}이(가) 대신 받습니다!");
-            barrierUnit.TakeDamageDirectly(damage); 
-            return; // 원래 타겟은 데미지 없음, 공개 안됨
-        }
-
-        TakeDamageDirectly(damage);
-    }
-
-    // 배리어 보호 없이 직접 데미지를 받는 내부 함수
-    public void TakeDamageDirectly(int damage)
-    {
-        // 데미지를 받으면 자신의 모습을 드러냅니다.
-        IsVisible = true;
-
-        ModifyHealth(-damage); // ModifyHealth 사용
-    }
-
     private UnitInstance GetBarrierProvider()
     {
-        // BarrierPassive를 가진 인접 아군 찾기
-        Grid grid = GameManager.Instance.gameGrid;
-        if (grid == null) return null;
-
+        // 내 주변에 BarrierPassive를 가진 살아있는 아군 거점이 있는지 확인
         foreach (var unit in GameManager.Instance.unitRegistry.Values)
         {
             if (unit != this && unit.owner == this.owner && unit.currentHealth > 0)
             {
-                // 인접 체크
-                Vector3 worldPos1 = grid.GetCellCenterWorld(this.location);
-                Vector3 worldPos2 = grid.GetCellCenterWorld(unit.location);
-                if (Vector3.Distance(worldPos1, worldPos2) < 1.5f * grid.cellSize.x)
+                Debug.Log($"[Barrier] {sourceCardData.cardName} 주변 유닛 확인: {unit.sourceCardData.cardName}");
+                // 육각형 그리드 상에서 인접한지 체크
+                if (IsAdjacent(this.location, unit.location))
                 {
-                    // 패시브 체크 (타입 직접 참조 대신 문자열 비교로 안전하게 처리)
-                    if (unit.sourceCardData is BaseCard baseCard && baseCard.passiveSkill != null && baseCard.passiveSkill.GetType().Name == "BarrierPassive")
+                    Debug.Log($"[Barrier] {sourceCardData.cardName}과(와) {unit.sourceCardData.cardName}은(는) 인접해 있습니다.");
+                    // 패시브 체크: BarrierPassive를 가지고 있는지 확인
+                    if (unit.sourceCardData is BaseCard baseCard && baseCard.passiveSkill != null && baseCard.passiveSkill is BarrierPassive)
                     {
+                        Debug.Log($"[Barrier] {unit.sourceCardData.cardName}이(가) {sourceCardData.cardName}을(를) 보호합니다!");
                         return unit;
                     }
                 }
             }
         }
+        Debug.Log($"[Barrier] {sourceCardData.cardName} 주변에 보호자가 없습니다.");
         return null;
+    }
+
+    public void TakeDamage(int damage)
+    {
+        // 1. 배리어 체크: 인접한 아군 중 BarrierPassive를 가진 유닛이 있는지 확인
+        // 단, 나 자신이 이미 배리어 유닛(은신처 등)이라면 다른 배리어의 보호를 받지 않음
+        bool isAlreadyBarrierUnit = (sourceCardData is BaseCard baseCardSelf && baseCardSelf.passiveSkill is BarrierPassive);
+        
+        UnitInstance barrierUnit = isAlreadyBarrierUnit ? null : GetBarrierProvider();
+        
+        if (barrierUnit != null)
+        {
+            Debug.Log($"[Barrier] {sourceCardData.cardName}이(가) 받을 피해 {damage}를 {barrierUnit.sourceCardData.cardName}이(가) 대신 받습니다! 본인은 은신을 유지합니다.");
+            
+            // 보호자(은신처)가 대신 피해를 입음 -> TakeDamageDirectly에 의해 은신처는 공개됨
+            barrierUnit.TakeDamageDirectly(damage); 
+            
+            // 원래 타겟은 여기서 함수가 종료되므로:
+            // - 피해를 입지 않음 (ModifyHealth 호출 안 됨)
+            // - 공개되지 않음 (isRevealed = true 호출 안 됨)
+            return; 
+        }
+
+        // 2. 보호자가 없거나 내가 배리어 유닛이면 본인이 직접 피해를 입음
+        TakeDamageDirectly(damage);
     }
 
     public void heal(int amount)
     {
         ModifyHealth(amount); // ModifyHealth 사용
+    }
+
+    // 배리어 보호 없이 직접 데미지를 받는 내부 함수
+    public void TakeDamageDirectly(int damage, UnitInstance attacker = null)
+    {
+        // 데미지를 받으면 자신의 모습을 드러냅니다.
+        if (!isRevealed || !isIdentified)
+        {
+            isRevealed = true;
+            isIdentified = true; // 데미지를 입으면 식별됨
+            
+            // 공개되었으므로 정찰 하이라이트(노란색)가 있다면 제거
+            if (TileEffectManager.Instance != null)
+            {
+                TileEffectManager.Instance.RemoveReconHighlight(location);
+            }
+        }
+
+        ModifyHealth(-damage); // ModifyHealth 사용
+
+        // --- 카운터/패시브 알림 추가 ---
+        List<UnitInstance> units = new List<UnitInstance>(GameManager.Instance.unitRegistry.Values);
+        foreach (var unit in units)
+        {
+            if (unit != null && unit.gameObject.activeInHierarchy)
+            {
+                if (unit.sourceCardData is BaseCard baseCard && baseCard.passiveSkill != null)
+                {
+                    baseCard.passiveSkill.OnTakeDamage(unit, damage, attacker);
+                }
+            }
+        }
     }
 
     // --- 상태 이상 관리 메서드 ---
@@ -357,13 +439,17 @@ public class UnitInstance : MonoBehaviour
     {
         // 중복 로직은 기획에 따라 다를 수 있음
         activeStatuses.Add(newStatus);
-        Debug.Log($"{sourceCardData.cardName}에게 {newStatus.type} 효과 적용 ({newStatus.value}, {newStatus.remainingTurns}턴).");
+        
+        // 매의 눈(Tracking) 상태가 추가되면 플래그 즉시 갱신
+        if (newStatus.type == Enums.StatusType.Tracking) isTracking = true;
+
+        Debug.Log($"{sourceCardData.cardName}에게 {newStatus.name}({newStatus.type}) 효과 적용 ({newStatus.value}, {newStatus.remainingTurns}턴).");
     }
 
     // 편의를 위한 오버로드
-    public void AddStatus(Enums.StatusType type, int value, int duration, UnitInstance creator = null)
+    public void AddStatus(string name, Enums.StatusType type, int value, int duration, UnitInstance creator = null)
     {
-        AddStatus(new StatusEffect(type, value, duration, false, creator));
+        AddStatus(new StatusEffect(name, type, value, duration, false, creator));
     }
 
     public void RemoveStatus(Enums.StatusType type)
@@ -375,6 +461,8 @@ public class UnitInstance : MonoBehaviour
                 activeStatuses.RemoveAt(i);
             }
         }
+        // 매의 눈 플래그 갱신
+        if (type == Enums.StatusType.Tracking) isTracking = HasStatus(Enums.StatusType.Tracking);
     }
 
     public bool HasStatus(Enums.StatusType type)
@@ -397,6 +485,9 @@ public class UnitInstance : MonoBehaviour
                 activeStatuses.RemoveAt(i);
             }
         }
+        
+        // 상태 정산 후 매의 눈 플래그 동기화
+        isTracking = HasStatus(Enums.StatusType.Tracking);
         
         // 행동 여부 초기화
         hasUsedSkillThisTurn = false;

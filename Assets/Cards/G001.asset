@@ -11,9 +11,10 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 015edef490fbcb342a3d1b4d88ddbacd, type: 3}
   m_Name: G001
-  m_EditorClassIdentifier: Assembly-CSharp::UnitCard
+  m_EditorClassIdentifier: 
   cardName: "\uCE58\uC548\uAD70 \uBCF4\uBCD1"
   cardType: 0
+  faction: 0
   description: 
   artwork: {fileID: -698603362481026512, guid: 18506297bc4b520439e4c03aa8a1d0c7, type: 3}
   unitSprite: {fileID: 8102842150688411597, guid: fbd9924c850a71b4fa5772f6fa6bb936, type: 3}
@@ -22,6 +23,6 @@ MonoBehaviour:
   maxHealth: 650
   attack: 190
   defense: 230
-  activeSkill: {fileID: 11400000, guid: 5c524358da0e2974caea79fb553bb2b9, type: 2}
+  activeSkill: {fileID: 11400000, guid: f61466a40a5e5ee4a830e25004be155c, type: 2}
   conditionalSkill: {fileID: 0}
   conditionalSkillCondition: 

@@ -5,14 +5,17 @@ using System.Collections.Generic;
 public class ReconAndDebuffEffect : ActionEffect
 {
     public int range = 1;
+    public string statusName; // 추가
     public Enums.StatusType statusType;
     public int value; // 버프/디버프 수치 (추가)
     public int duration = 1;
 
-    public override void Apply(UnitInstance caster, Vector3Int targetTile)
+    public override bool Apply(UnitInstance caster, Vector3Int targetTile)
     {
         Grid grid = GameManager.Instance.gameGrid;
-        if (grid == null) return;
+        if (grid == null) return false;
+
+        //bool anyTargetFound = false;
 
         // 시전자 소유자 확인
         GameManager.Player casterOwner = (caster != null) ? caster.owner : GameManager.Instance.currentPlayer;
@@ -34,15 +37,17 @@ public class ReconAndDebuffEffect : ActionEffect
                     if (targetUnit != null && targetUnit.owner != casterOwner)
                     {
                         // 발견!
-                        targetUnit.IsVisible = true;
+                        targetUnit.isRevealed = true;
                         
                         // 디버프 부여 (입력받은 value 사용)
-                        StatusEffect debuff = new StatusEffect(statusType, value, duration);
+                        StatusEffect debuff = new StatusEffect(statusName, statusType, value, duration, false, caster);
                         targetUnit.AddStatus(debuff);
-                        Debug.Log($"[Recon] {targetUnit.sourceCardData.cardName} 발견 및 {statusType}({value}) 상태 부여.");
+                        Debug.Log($"[Recon] {targetUnit.sourceCardData.cardName} 발견 및 {statusName}({value}) 상태 부여.");
+                        //anyTargetFound = true;
                     }
                 }
             }
         }
+        return true; // 정찰은 아무것도 못 찾아도 '실행'된 것으로 간주 (에너지 소모)
     }
 }

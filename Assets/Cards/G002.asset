@@ -11,15 +11,18 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 015edef490fbcb342a3d1b4d88ddbacd, type: 3}
   m_Name: G002
-  m_EditorClassIdentifier: Assembly-CSharp::UnitCard
+  m_EditorClassIdentifier: 
   cardName: "\uC815\uBD80 \uC815\uCC30\uBCD1"
-  rarity: 2
   cardType: 0
+  faction: 0
   description: 
   artwork: {fileID: 1590698180407441471, guid: ef140ea4dbe439442ac18e7ebd0f7ec9, type: 3}
   unitSprite: {fileID: 3756282102072125371, guid: 14b4a809ea952ee44aed2d299c613cca, type: 3}
+  rarity: 2
   unitClass: 1
   maxHealth: 800
   attack: 100
   defense: 300
-  activeSkill: {fileID: 11400000, guid: 9fff8fc9cd49dcb48bb08160964c1811, type: 2}
+  activeSkill: {fileID: 11400000, guid: e244777a7c00dc841852b953bd91470d, type: 2}
+  conditionalSkill: {fileID: 0}
+  conditionalSkillCondition: 

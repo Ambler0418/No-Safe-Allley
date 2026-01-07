@@ -28,4 +28,9 @@ public class PassiveSkill : ScriptableObject
     public virtual void OnUnitDied(UnitInstance owner, UnitInstance deadUnit)
     {
     }
+
+    // 필드 상황 변화(이동, 배치 등) 시 발동
+    public virtual void OnBoardChange(UnitInstance owner)
+    {
+    }
 }

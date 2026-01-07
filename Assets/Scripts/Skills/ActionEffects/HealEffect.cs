@@ -5,7 +5,7 @@ public class HealEffect : ActionEffect
 {
     [Header("Heal Effect Settings")]
     public int healAmount = 30; // 회복량 설정
-    public override void Apply(UnitInstance caster, Vector3Int targetTile)
+    public override bool Apply(UnitInstance caster, Vector3Int targetTile)
     {
         UnitInstance targetUnit = GameManager.Instance.GetUnitAt(targetTile);
 
@@ -18,6 +18,8 @@ public class HealEffect : ActionEffect
         {
             targetUnit.heal(healAmount);
             Debug.Log($"{casterName}이(가) {targetUnit.sourceCardData.cardName}을(를) {healAmount}만큼 회복시켰습니다.");
+            return true;
         }
+        return false;
     }
 }

@@ -7,12 +7,12 @@ public class HPPercentScalingDamageEffect : DealDamageEffect
     public float missingHpPercentThreshold = 0.2f; // 잃은 체력 기준 (0.2 = 20%)
     public float bonusCoefficientPerStack = 0.1f;  // 스택당 추가 계수 (0.1 = 10%)
 
-    public override void Apply(UnitInstance caster, Vector3Int targetTile)
+    public override bool Apply(UnitInstance caster, Vector3Int targetTile)
     {
         if (caster == null)
         {
             Debug.LogError("[HP Scaling Damage] 시전자(caster)가 없습니다. 이 스킬은 유닛 전용입니다.");
-            return;
+            return false;
         }
 
         float currentHpPercent = (float)caster.currentHealth / caster.maxHealth;
@@ -27,8 +27,9 @@ public class HPPercentScalingDamageEffect : DealDamageEffect
 
         Debug.Log($"[HP Scaling] 잃은 체력 {missingHpPercent:P0} ({stacks} 스택). 계수 {originalCoefficient} -> {attackCoefficient}");
 
-        base.Apply(caster, targetTile);
+        bool result = base.Apply(caster, targetTile);
 
         attackCoefficient = originalCoefficient;
+        return result;
     }
 }

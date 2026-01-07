@@ -16,19 +16,16 @@ public class AdministrativeSystem : PassiveSkill
         GameManager.Instance.AddEnergy(energyAmount);
         Debug.Log($"[Passive] {owner.sourceCardData.cardName}: 에너지 {energyAmount} 획득.");
 
-        // 2. 인접 유닛 체크 및 회복
-        if (CheckAdjacentAlly(owner))
-        {
-            owner.heal(healAmount);
-            Debug.Log($"[Passive] {owner.sourceCardData.cardName}: 인접 아군이 있어 체력 {healAmount} 회복.");
-        }
+        // 2. 인접 아군 회복
+        HealAdjacentAllies(owner);
     }
 
-    private bool CheckAdjacentAlly(UnitInstance owner)
+    private void HealAdjacentAllies(UnitInstance owner)
     {
         Grid grid = GameManager.Instance.gameGrid;
-        if (grid == null) return false;
+        if (grid == null) return;
 
+        int healedCount = 0;
         foreach (var unit in GameManager.Instance.unitRegistry.Values)
         {
             if (unit != owner && unit.owner == owner.owner)
@@ -36,14 +33,47 @@ public class AdministrativeSystem : PassiveSkill
                 // 진영 체크
                 if (useFactionCheck && unit.Faction != targetFaction) continue;
 
-                // 거리 1.5 이하 인접
-                Vector3 worldPos1 = grid.GetCellCenterWorld(owner.location);
-                Vector3 worldPos2 = grid.GetCellCenterWorld(unit.location);
-                if (Vector3.Distance(worldPos1, worldPos2) < 1.5f * grid.cellSize.x)
+                // 논리적 좌표 체크로 인접 확인 (Grid 설정 오차 제거)
+                if (IsAdjacent(owner.location, unit.location))
                 {
-                    return true;
+                    unit.heal(healAmount);
+                    healedCount++;
                 }
             }
+        }
+        if (healedCount > 0)
+        {
+            Debug.Log($"[Passive] {owner.sourceCardData.cardName}: 인접 아군 {healedCount}명에게 체력 {healAmount} 회복.");
+        }
+    }
+
+    // 육각형 그리드(Pointy-top) 기준 정확한 인접 체크
+    private bool IsAdjacent(Vector3Int pos1, Vector3Int pos2)
+    {
+        // 1. 같은 위치면 인접 아님
+        if (pos1 == pos2) return false;
+
+        // 2. 짝수 행 (Even Row)
+        if (pos1.y % 2 == 0)
+        {
+            // 인접 오프셋: (-1,1), (0,1), (1,0), (0,-1), (-1,-1), (-1,0)
+            int dx = pos2.x - pos1.x;
+            int dy = pos2.y - pos1.y;
+            
+            if (dy == 1) return dx == -1 || dx == 0;
+            if (dy == 0) return dx == 1 || dx == -1;
+            if (dy == -1) return dx == 0 || dx == -1;
+        }
+        // 3. 홀수 행 (Odd Row)
+        else
+        {
+            // 인접 오프셋: (0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,0)
+            int dx = pos2.x - pos1.x;
+            int dy = pos2.y - pos1.y;
+
+            if (dy == 1) return dx == 0 || dx == 1;
+            if (dy == 0) return dx == 1 || dx == -1;
+            if (dy == -1) return dx == 1 || dx == 0;
         }
         return false;
     }

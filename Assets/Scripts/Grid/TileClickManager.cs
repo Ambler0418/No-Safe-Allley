@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using UnityEngine.EventSystems; // UI 클릭 감지를 위해 추가
+using UnityEngine.EventSystems;
+using System.Security; // UI 클릭 감지를 위해 추가
 
 public class TileClickManager : MonoBehaviour
 {
@@ -14,8 +15,25 @@ public class TileClickManager : MonoBehaviour
 
     void Update()
     {
+        // 카드를 드래그 중일 때는 타일 상호작용(선택, 이동 등)을 막음
+        if (HandManager.Instance != null && HandManager.Instance.IsDragging) return;
+
         var gm = GameManager.Instance;
         var tem = TileEffectManager.Instance;
+
+        // --- 안전 장치: 모드가 종료되었는데 호버 플래그가 남아있다면 정리 ---
+        // GameManager가 모드를 종료할 때 ClearTemporaryTiles를 호출하지만, 
+        // 타이밍 문제나 예외 상황을 대비해 여기서도 확실하게 정리합니다.
+        if (!gm.isMovingUnit && isMoveHoverTileSet)
+        {
+            tem.ClearTemporaryTiles(); // 안전하게 모든 임시 타일 제거
+            isMoveHoverTileSet = false;
+        }
+        if (!gm.isTargetingSkill && isSkillHoverTileSet)
+        {
+            tem.ClearTemporaryTiles(); // 안전하게 모든 임시 타일 제거
+            isSkillHoverTileSet = false;
+        }
 
         // --- 유닛 이동 로직 ---
         if (gm.isMovingUnit)
@@ -35,7 +53,7 @@ public class TileClickManager : MonoBehaviour
             {
                 if (isMoveHoverTileSet)
                 {
-                    tem.effectTilemap.SetTile(lastHoveredTile, null);
+                    tem.ClearEffectTileSafe(lastHoveredTile);
                     isMoveHoverTileSet = false;
                 }
 
@@ -83,7 +101,7 @@ public class TileClickManager : MonoBehaviour
         {
             if (isMoveHoverTileSet)
             {
-                tem.effectTilemap.SetTile(lastHoveredTile, null);
+                tem.ClearEffectTileSafe(lastHoveredTile);
                 isMoveHoverTileSet = false;
             }
         }
@@ -100,7 +118,7 @@ public class TileClickManager : MonoBehaviour
             {
                 if (isSkillHoverTileSet)
                 {
-                    tem.effectTilemap.SetTile(lastHoveredTile, null);
+                    tem.ClearEffectTileSafe(lastHoveredTile);
                     isSkillHoverTileSet = false;
                 }
                 
@@ -143,48 +161,98 @@ public class TileClickManager : MonoBehaviour
                 if (skillToUse != null)
                 {
                     // --- 수정된 타겟 유효성 검사 ---
-                    // 유닛의 존재 여부가 아닌, 타일맵의 소속으로 타겟 유효성 판단
                     bool isValidTile = false;
-                    if (skillToUse.targetType == SkillTargetType.Ally)
-                    {
-                        isValidTile = allyTilemap.HasTile(currentHoverTile);
-                    }
-                    else // Enemy
-                    {
-                        isValidTile = enemyTilemap.HasTile(currentHoverTile);
+                    UnitInstance targetUnit = gm.GetUnitAt(currentHoverTile);
+                    
+                    // 1. 사거리 체크
+                    float dist = Vector3.Distance(gameGrid.GetCellCenterWorld(caster.location), gameGrid.GetCellCenterWorld(currentHoverTile));
+                    // 육각형 그리드 1칸 거리 = cellSize.x * 1.0
+                    // 여유분을 두어 1.1배로 계산. maxRange가 1이면 인접(약 1.0~1.2) 허용
+                    // 2칸 거리 = 1.732 or 2.0.
+                    // 간단히: (maxRange * gameGrid.cellSize.x * 1.1f)
+                    
+                    bool inRange = dist <= (skillToUse.maxRange * gameGrid.cellSize.x * 1.1f) + 0.1f;
+                    
+                    // 본인 위치 클릭(거리 0)은 인접으로 치지 않거나, 스킬에 따라 허용될 수 있음.
+                    // 보통 버프류는 본인 제외일 수 있으나 일단 포함하고, 필요 시 caster != targetUnit 체크.
+                    // G003은 "인접 아군"이므로 거리 > 0.1f 조건이 필요할 수 있음. 
+                    // 하지만 maxRange 체크만으로는 충분. (본인에게 쓰는 건 기획 의도에 따라)
 
-                        // 💥 도발(Provoked) 체크 추가 💥
-                        if (isValidTile && caster.HasStatus(Enums.StatusType.Provoked))
+                    if (inRange)
+                    {
+                        if (skillToUse.targetType == SkillTargetType.Ally)
                         {
-                            // 시전자에게 걸린 도발 효과 찾기
-                            StatusEffect provocation = caster.activeStatuses.Find(s => s.type == Enums.StatusType.Provoked);
-                            if (provocation != null && provocation.creator != null)
+                            // 아군 타겟 스킬: 해당 위치에 아군 유닛이 있어야 함
+                            if (targetUnit != null && targetUnit.owner == GameManager.Player.Player1)
                             {
-                                // 도발 시전자의 위치와 클릭한 위치가 다르면 무효
-                                if (currentHoverTile != provocation.creator.location)
+                                // G003(인접 아군) 같은 경우 본인 제외가 필요할 수 있음.
+                                // 일단은 아군이면 OK
+                                isValidTile = true;
+                            }
+                        }
+                        else if (skillToUse.targetType == SkillTargetType.Enemy)
+                        {
+                            // 적군 타겟 스킬
+                            // 적 유닛이 있거나, (빈 땅 공격이 가능한 경우) 적 타일맵 위여야 함
+                            // 여기서는 일단 기존 로직(타일맵 체크) 유지하되 거리 체크 추가됨
+                            if (enemyTilemap.HasTile(currentHoverTile))
+                            {
+                                isValidTile = true;
+                            }
+
+                            // 💥 도발(Provoked) 체크 💥
+                            if (isValidTile && caster.HasStatus(Enums.StatusType.Provoked))
+                            {
+                                StatusEffect provocation = caster.activeStatuses.Find(s => s.type == Enums.StatusType.Provoked);
+                                if (provocation != null && provocation.creator != null)
                                 {
-                                    Debug.Log($"도발 효과로 인해 {provocation.creator.sourceCardData.cardName}만 공격할 수 있습니다!");
-                                    isValidTile = false;
+                                    if (currentHoverTile != provocation.creator.location)
+                                    {
+                                        Debug.Log($"도발 효과로 인해 {provocation.creator.sourceCardData.cardName}만 공격할 수 있습니다!");
+                                        isValidTile = false;
+                                    }
                                 }
                             }
                         }
                     }
+                    else
+                    {
+                         // 사거리 밖
+                         Debug.Log($"사거리 밖입니다. (Distance: {dist}, MaxRange: {skillToUse.maxRange})");
+                    }
 
                     if (isValidTile)
                     {
-                        // 유효한 타일이면 유닛 존재 여부와 관계없이 스킬 발동 및 에너지 소모
+                        // 유효한 타일이면 에너지를 먼저 체크하고 실행을 시도합니다.
                         int finalCost = caster.GetSkillCost(skillToUse);
-                        if (gm.SpendEnergy(finalCost))
+                        if (gm.HasEnoughEnergy(finalCost))
                         {
-                            caster.hasUsedSkillThisTurn = true;
-                            skillToUse.Execute(caster, currentHoverTile);
+                            // 실제 스킬 로직을 실행하고 그 결과(성공 여부)를 받습니다.
+                            if (skillToUse.Execute(caster, currentHoverTile))
+                            {
+                                // 성공했을 때만 에너지 소모 및 행동 완료 처리
+                                gm.SpendEnergy(finalCost);
+                                caster.hasUsedSkillThisTurn = true;
+                                Debug.Log($"스킬 {skillToUse.skillName} 사용 성공.");
+                            }
+                            else
+                            {
+                                // 조건 불만족 등으로 실패한 경우
+                                Debug.Log("스킬 사용 실패: 조건이 맞지 않습니다.");
+                            }
                         }
+                        
+                        // 성공/실패 여부와 상관없이 타겟팅 모드는 종료합니다.
+                        // (실패했다면 다시 버튼을 눌러 진입할 수 있습니다.)
+                        isSkillHoverTileSet = false; 
                         gm.ExitSkillTargetingMode();
                     }
                     else
                     {
-                        // 이제 이 부분은 맵 바깥을 클릭했을 때만 호출됨
-                        Debug.Log("지정할 수 없는 영역입니다.");
+                        // 잘못된 대상을 클릭하면 즉시 취소
+                        Debug.Log("유효하지 않은 대상입니다. 스킬 사용이 취소됩니다.");
+                        isSkillHoverTileSet = false; // 호버 플래그 해제 (잔상 방지 보조)
+                        gm.ExitSkillTargetingMode();
                     }
                 }
             }
@@ -194,7 +262,7 @@ public class TileClickManager : MonoBehaviour
         {
             if (isSkillHoverTileSet)
             {
-                tem.effectTilemap.SetTile(lastHoveredTile, null);
+                tem.ClearEffectTileSafe(lastHoveredTile);
                 isSkillHoverTileSet = false;
             }
         }
@@ -214,25 +282,25 @@ public class TileClickManager : MonoBehaviour
             UnitInstance unit = gm.GetUnitAt(clickedTile);
             if (unit != null)
             {
-                // 현재 턴의 플레이어가 유닛의 소유자가 아니면 아무것도 하지 않음
-                if (unit.owner != gm.currentPlayer)
+                // 1. 적 유닛(내 유닛이 아님)인 경우 식별 여부 체크
+                bool isEnemy = (unit.owner != GameManager.Player.Player1);
+                if (isEnemy && !unit.isIdentified)
                 {
-                    Debug.Log($"상대방의 유닛({unit.sourceCardData.cardName})은 선택할 수 없습니다.");
+                    Debug.Log($"[TileClickManager] 선택 불가: 적 유닛 {unit.sourceCardData.cardName}은 식별되지 않았습니다. (Owner: {unit.owner}, isIdentified: {unit.isIdentified})");
+                    gm.DeselectUnit();
                     return;
                 }
 
-                // 게임 단계에 따라 다른 행동 수행
-                switch (gm.currentPhase)
+                // 2. 내 유닛인 경우 배치 단계라면 이동 모드 진입
+                if (!isEnemy && gm.currentPhase == GameManager.GamePhase.Placement)
                 {
-                    // 배치 단계: 유닛 이동 모드 진입
-                    case GameManager.GamePhase.Placement:
-                        gm.EnterMoveMode(unit);
-                        break;
-                    
-                    // 행동 단계: 스킬 사용을 위해 유닛 선택
-                    case GameManager.GamePhase.Action:
-                        gm.SelectUnit(unit);
-                        break;
+                    gm.SelectUnit(unit);
+                    gm.EnterMoveMode(unit);
+                }
+                else
+                {
+                    // 3. 그 외의 경우 (내 유닛 정보 보기 또는 식별된 적 유닛 정보 보기)
+                    gm.SelectUnit(unit);
                 }
             }
             else

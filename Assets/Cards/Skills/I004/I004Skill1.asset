@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60a66167569e2084caf33ace57ad6aba, type: 3}
+  m_Name: I004Skill1
+  m_EditorClassIdentifier: Assembly-CSharp::SkillEffect
+  skillName: "\uC2DC\uCCB4 \uD574\uBD80"
+  skillDescription: "\uC120\uD0DD\uD55C \uCE78 \uBC0F \uC778\uC811\uD55C \uCE78\uC744
+    \uC815\uCC30\uD558\uBA70, \uC815\uCC30\uB41C \uC801\uC740 \uBC1B\uD53C\uC99D
+    20%\uC5D0 \uBE60\uC9C4\uB2E4."
+  energyCost: 3
+  targetType: 0
+  maxRange: 100
+  areaPattern: {fileID: 11400000, guid: 475327595d0684c498faa6c4e4454776, type: 2}
+  actionEffects:
+  - {fileID: 11400000, guid: 69fc2bcc222aff7439578667280f512f, type: 2}
+  - {fileID: 11400000, guid: ee2e5c5dc764f304582dc5d6f91e279f, type: 2}
+  casterEffects: []

@@ -11,10 +11,11 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9abd473f958f98143a60cfa6ad73d0d2, type: 3}
   m_Name: G008
-  m_EditorClassIdentifier: Assembly-CSharp::TacticsCard
+  m_EditorClassIdentifier: 
   cardName: "\uACC4\uC5C4\uB839 \uC120\uD3EC"
   cardType: 1
+  faction: 0
   description: 
   artwork: {fileID: 4625557215059044956, guid: d7f747bb438108244bc2b406e68e638d, type: 3}
-  energyCost: 4
-  tacticSkill: {fileID: 0}
+  energyCost: 0
+  tacticSkill: {fileID: 11400000, guid: 436e5f7ff60c1b549ab43e1531414ffa, type: 2}

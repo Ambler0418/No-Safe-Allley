@@ -11,11 +11,12 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: da155dd29256ec944b23e9de3ea85986, type: 3}
   m_Name: G006
-  m_EditorClassIdentifier: Assembly-CSharp::BaseCard
+  m_EditorClassIdentifier: 
   cardName: "\uC804\uCD08 \uAE30\uC9C0"
   cardType: 2
+  faction: 0
   description: 
   artwork: {fileID: 4704321660529103103, guid: f4dc7f36aa682ba42bb811fd4a9df5cd, type: 3}
   maxHealth: 1400
   unitSprite: {fileID: 2920070367447021475, guid: 5d0063abcd5e9d64e8c4a06eaf0c96fd, type: 3}
-  activeSkill: {fileID: 0}
+  passiveSkill: {fileID: 11400000, guid: 6e9c676a71000dc4da52f3784fa98e5a, type: 2}

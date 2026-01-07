@@ -5,7 +5,7 @@ public class DrawCardEffect : ActionEffect
 {
     public int amount = 1;
 
-    public override void Apply(UnitInstance caster, Vector3Int targetTile)
+    public override bool Apply(UnitInstance caster, Vector3Int targetTile)
     {
         // HandManager를 통해 카드 드로우
         if (HandManager.Instance != null)
@@ -17,6 +17,8 @@ public class DrawCardEffect : ActionEffect
         else
         {
             Debug.LogError("HandManager 인스턴스를 찾을 수 없습니다.");
+            return false;
         }
+        return true;
     }
 }

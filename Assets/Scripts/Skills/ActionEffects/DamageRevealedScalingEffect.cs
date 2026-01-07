@@ -5,7 +5,7 @@ public class DamageRevealedScalingEffect : DealDamageEffect
 {
     public float revealedBonusCoefficient = 1.0f; // 노출 시 추가될 계수 (1.5 -> 2.5 면 1.0 추가)
 
-    public override void Apply(UnitInstance caster, Vector3Int targetTile)
+    public override bool Apply(UnitInstance caster, Vector3Int targetTile)
     {
         UnitInstance targetUnit = GameManager.Instance.GetUnitAt(targetTile);
         
@@ -14,19 +14,20 @@ public class DamageRevealedScalingEffect : DealDamageEffect
             float originalCoeff = attackCoefficient;
             
             // 타겟이 이미 노출된 상태라면 보너스 적용
-            if (targetUnit.IsVisible)
+            if (targetUnit.isRevealed)
             {
                 attackCoefficient += revealedBonusCoefficient;
                 Debug.Log($"[Backstab] 타겟 노출 상태! 계수 증가: {originalCoeff} -> {attackCoefficient}");
             }
 
-            base.Apply(caster, targetTile);
+            bool result = base.Apply(caster, targetTile);
 
             attackCoefficient = originalCoeff; // 복구
+            return result;
         }
         else
         {
-            base.Apply(caster, targetTile);
+            return base.Apply(caster, targetTile);
         }
     }
 }

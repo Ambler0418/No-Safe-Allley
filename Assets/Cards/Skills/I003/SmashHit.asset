@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60a66167569e2084caf33ace57ad6aba, type: 3}
+  m_Name: SmashHit
+  m_EditorClassIdentifier: 
+  skillName: "\uBD84\uC1C4 \uD0C0\uACA9"
+  skillDescription: "\uB2E8\uC77C \uC801 150% \uACF5\uACA9. \uD53C\uD574\uB7C9 50%
+    \uD761\uD608"
+  energyCost: 4
+  targetType: 0
+  maxRange: 100
+  areaPattern: {fileID: 11400000, guid: 187cf5269c6a00e48bdf4a051dcf92cb, type: 2}
+  actionEffects:
+  - {fileID: 11400000, guid: 5a9201e60f6956e48b13a5e199aaa6be, type: 2}
+  casterEffects: []

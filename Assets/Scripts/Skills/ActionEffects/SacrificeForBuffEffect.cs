@@ -4,11 +4,12 @@ using UnityEngine;
 public class SacrificeForBuffEffect : ActionEffect
 {
     public int hpCost = 100;
+    public string statusName; // 추가
     public Enums.StatusType statusType;
     public int value;
     public int duration;
 
-    public override void Apply(UnitInstance caster, Vector3Int targetTile)
+    public override bool Apply(UnitInstance caster, Vector3Int targetTile)
     {
         UnitInstance targetUnit = GameManager.Instance.GetUnitAt(targetTile);
         
@@ -23,10 +24,12 @@ public class SacrificeForBuffEffect : ActionEffect
                 targetUnit.ModifyHealth(-hpCost);
                 
                 // 버프 부여
-                StatusEffect buff = new StatusEffect(statusType, value, duration);
+                StatusEffect buff = new StatusEffect(statusName, statusType, value, duration, false, caster);
                 targetUnit.AddStatus(buff);
-                Debug.Log($"[Sacrifice] {targetUnit.sourceCardData.cardName} 체력 {hpCost} 소모, {statusType} ({value}) 획득.");
+                Debug.Log($"[Sacrifice] {targetUnit.sourceCardData.cardName} 체력 {hpCost} 소모, {statusName}({value}) 획득.");
+                return true;
             }
         }
+        return false;
     }
 }

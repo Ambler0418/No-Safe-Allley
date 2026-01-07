@@ -8,11 +8,13 @@ public class GlobalAllEnemyPattern : AreaPattern
     {
         List<Vector3Int> tiles = new List<Vector3Int>();
         
+        if (GameManager.Instance == null) return tiles;
+
         GameManager.Player currentPlayer = GameManager.Instance.currentPlayer;
         
         foreach (var unit in GameManager.Instance.unitRegistry.Values)
         {
-            if (unit.owner != currentPlayer)
+            if (unit != null && unit.owner != currentPlayer)
             {
                 tiles.Add(unit.location);
             }

@@ -7,6 +7,7 @@ public class PlacementManager : MonoBehaviour
     public Grid gameGrid;             // 필드 전체를 관리하는 단일 Grid
     public GameObject unitPrefab;      // UnitInstance 스크립트가 붙은 유닛 프리팹
     public Tilemap allyTilemap;       // 아군 영역 타일맵 (배치 가능 영역 확인용)
+    public Tilemap enemyTilemap;      // 적군 영역 타일맵 (AI 배치용)
 
     public static PlacementManager Instance;
 
@@ -82,6 +83,7 @@ public bool TryPlaceCard(CardData card, Vector3 worldPosition)
     }
     else if (card.cardType == Enums.CardType.Tactics)
     {
+
         TacticsCard tacticsCard = card as TacticsCard;
         if (tacticsCard == null || tacticsCard.tacticSkill == null)
         {
@@ -99,9 +101,18 @@ public bool TryPlaceCard(CardData card, Vector3 worldPosition)
             // 2. 스킬 효과 발동
             // 전술 카드는 필드 위 유닛이 시전하는 것이 아니므로 caster는 null입니다.
             // 타겟 타일은 카드를 내려놓은 위치(cellLocation)를 전달합니다.
-            skillToUse.Execute(null, cellLocation);
+            bool success = skillToUse.Execute(null, cellLocation);
 
-            return true; // 사용 성공 -> 카드 파괴
+            if (success)
+            {
+                return true; // 사용 성공 -> 카드 파괴
+            }
+            else
+            {
+                Debug.Log($"'{card.cardName}' 사용 실패 (조건 불만족 등). 에너지를 환급합니다.");
+                GameManager.Instance.AddEnergy(skillToUse.energyCost); // 에너지 환급
+                return false; // 사용 실패 -> 카드를 손으로 돌려보냄
+            }
         }
         else
         {
@@ -122,7 +133,12 @@ public bool TryPlaceCard(CardData card, Vector3 worldPosition)
             return false;
         }
 
-        // 2. 이미 유닛/거점이 있는지 확인 (추가 로직 필요)
+        // 2. 이미 유닛/거점이 있는지 확인
+        if (GameManager.Instance.GetUnitAt(cell) != null)
+        {
+            Debug.Log($"배치 실패: 해당 위치({cell})에 이미 유닛이나 거점이 있습니다.");
+            return false;
+        }
 
         return true;
     }
@@ -184,22 +200,15 @@ private void SpawnUnit(CardData card, Vector3Int cellLocation)
 
     if (unitInstance != null)
     {
-        unitInstance.Initialize(card); // 카드 데이터 초기화
-        unitInstance.owner = GameManager.Instance.currentPlayer; // 소유자 설정
+        unitInstance.Initialize(card, GameManager.Instance.currentPlayer); // Owner 전달
         unitInstance.location = cellLocation;
 
         // 유닛 레지스트리에 등록
         GameManager.Instance.RegisterUnit(cellLocation, unitInstance);
 
-        // 유닛의 초기 가시성 설정
-        if (unitInstance.owner != GameManager.Player.Player1)
-        {
-            unitInstance.IsVisible = false; // 상대(AI, 네트워크) 유닛은 보이지 않게 시작
-        }
-        else
-        {
-            unitInstance.IsVisible = true; // 내 유닛은 보이게 시작
-        }
+        // 유닛의 초기 가시성 설정: 모든 유닛은 은신 상태로 시작
+        unitInstance.isIdentified = false;
+        unitInstance.isRevealed = false;
         
         // 스프라이트 할당 로직은 unitSpriteToUse를 사용하여 그대로 유지
         SpriteRenderer sr = newUnitObject.GetComponent<SpriteRenderer>();
@@ -209,6 +218,9 @@ private void SpawnUnit(CardData card, Vector3Int cellLocation)
         }
         
         Debug.Log($"[{card.cardType}] '{card.cardName}'를 {cellLocation} 위치에 배치했습니다. (소유자: {unitInstance.owner})");
+        
+        // 보드 상태 변경 알림 (패시브 갱신)
+        GameManager.Instance.TriggerBoardChangeEvents();
     }
 }
 }

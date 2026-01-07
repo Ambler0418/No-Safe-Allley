@@ -14,6 +14,10 @@ namespace Map
         
         public List<EnemySpawnInfo> enemies = new List<EnemySpawnInfo>();
         
+        [Header("Enemy Deck")]
+        public List<CardData> initialHand = new List<CardData>(); // 초기 핸드 지정
+        public List<CardData> enemyDeck = new List<CardData>();
+
         // 추가 가능: 보상 정보, 배경 이미지 등
     }
 }

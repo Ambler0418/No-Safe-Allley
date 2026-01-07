@@ -66,7 +66,8 @@ public class GameManager : MonoBehaviour
     public Grid gameGrid; // 테스트용 유닛 생성 시 좌표 계산을 위해 Grid 참조 추가
 
     [Header("Card Data for Test")]
-    public UnitCard boomCardData; // 테스트용으로 생성할 Boom 카드 데이터
+    public UnitCard AssaultCardData; // 테스트용으로 생성할 Boom 카드 데이터
+    public UnitCard ScoutCardData; // 테스트용으로 생성할 Scout 카드 데이터
 
     [Header("Player Stats")]
     public int player1Health = 15;
@@ -76,6 +77,10 @@ public class GameManager : MonoBehaviour
 
     [Header("Combat Tracking")]
     public int deadEnemyCount = 0; // 사망한 적 유닛 수 (I004 스킬용)
+
+    [Header("AI State")]
+    public List<CardData> enemyDeck = new List<CardData>();
+    public List<CardData> enemyHand = new List<CardData>();
 
     void Awake()
     {
@@ -119,31 +124,43 @@ public class GameManager : MonoBehaviour
         }
     }
 
-        public void NotifyUnitDeath(UnitInstance deadUnit)
-        {
-            // 적 유닛이 사망한 경우 카운트 증가 (플레이어가 Player1이라고 가정)
-            if (deadUnit.owner == Player.Player2 && deadUnit.sourceCardData is UnitCard)
+            public void NotifyUnitDeath(UnitInstance deadUnit)
             {
-                deadEnemyCount++;
-                Debug.Log($"적 유닛 사망 카운트 증가: {deadEnemyCount}");
-            }
-    
-            // 모든 유닛의 패시브 스킬에 사망 이벤트 전파        // 컬렉션 변경 오류 방지를 위해 리스트 복사 후 순회
-        List<UnitInstance> units = new List<UnitInstance>(unitRegistry.Values);
-        foreach (var unit in units)
-        {
-            if (unit != null && unit.gameObject.activeInHierarchy) // 파괴되지 않은 유닛만
-            {
-                // UnitInstance에 HandlePassiveUnitDeath 메서드를 추가하여 호출하는 것이 깔끔함
-                // 하지만 여기서는 직접 접근 (UnitInstance 수정 최소화)
-                if (unit.sourceCardData is BaseCard baseCard && baseCard.passiveSkill != null)
+                Debug.Log($"[NotifyUnitDeath] {deadUnit.sourceCardData.cardName} 사망 알림 시작.");
+        
+                // 적 유닛이 사망한 경우 카운트 증가 (플레이어가 Player1이라고 가정)
+                if (deadUnit.owner == Player.Player2 && deadUnit.sourceCardData is UnitCard)
                 {
-                    baseCard.passiveSkill.OnUnitDied(unit, deadUnit);
+                    deadEnemyCount++;
+                    Debug.Log($"적 유닛 사망 카운트 증가: {deadEnemyCount}");
                 }
+        
+                // 모든 유닛의 패시브 스킬에 사망 이벤트 전파
+                // 컬렉션 변경 오류 방지를 위해 리스트 복사 후 순회
+                List<UnitInstance> myUnits = unitRegistry.Values.Where(u => u.owner == Player.Player1 && u.currentHealth > 0).ToList();
+                foreach (var unit in myUnits)
+                {
+                    if (unit != null && unit.gameObject.activeInHierarchy) // 파괴되지 않은 유닛만
+                    {
+                        // 디버깅: 현재 필드에 있는 유닛들이 이벤트를 수신하는지 확인
+                        Debug.Log($"[Event Check] {unit.sourceCardData.cardName} 확인 중...");
+        
+                        if (unit.sourceCardData is BaseCard baseCard)
+                        {
+                            if (baseCard.passiveSkill != null)
+                            {
+                                Debug.Log($" -> {baseCard.cardName}의 패시브 스킬 {baseCard.passiveSkill.name} 호출 시도.");
+                                baseCard.passiveSkill.OnUnitDied(unit, deadUnit);
+                            }
+                            else
+                            {
+                                Debug.Log($" -> {baseCard.cardName}은 패시브 스킬이 없음.");
+                            }
+                        }
+                    }
+                }
+                Debug.Log("[NotifyUnitDeath] 알림 종료.");
             }
-        }
-    }
-
     public void ResetDeadEnemyCount()
     {
         deadEnemyCount = 0;
@@ -201,6 +218,9 @@ public class GameManager : MonoBehaviour
         currentPhase = GamePhase.Preparation; // 이벤트 발생
         Debug.Log("Phase: Preparation - 유닛과 거점을 배치하세요.");
 
+        // AI 덱 초기화 (테스트용)
+        InitializeEnemyDeck();
+
         // 전투 데이터가 있으면 그것으로 초기화, 없으면 기존 테스트 로직 실행
         if (currentEncounter != null)
         {
@@ -219,6 +239,26 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void InitializeEnemyDeck()
+    {
+        enemyDeck.Clear();
+        enemyHand.Clear();
+        // 테스트용 기본 덱 (Encounter가 없을 경우 대비)
+        if (AssaultCardData != null && ScoutCardData != null && currentEncounter == null)
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                enemyDeck.Add(AssaultCardData);
+                enemyDeck.Add(ScoutCardData);
+            }
+            // 초기 핸드 1장
+            for (int i=0; i<1; i++) {
+                enemyHand.Add(AssaultCardData);
+                enemyDeck.Add(ScoutCardData);
+            }
+        }
+    }
+
     // --- 전투 인카운터 설정 ---
     private void SetupEncounter()
     {
@@ -226,13 +266,47 @@ public class GameManager : MonoBehaviour
         
         Debug.Log($"전투 초기화: {currentEncounter.encounterName}");
         
+        // 1. 적 덱 및 핸드 설정
+        enemyDeck.Clear();
+        enemyHand.Clear();
+
+        // 덱 설정 (셔플 없음 - 순서대로)
+        if (currentEncounter.enemyDeck != null)
+        {
+            enemyDeck.AddRange(currentEncounter.enemyDeck);
+        }
+
+        // 초기 핸드 설정
+        if (currentEncounter.initialHand != null && currentEncounter.initialHand.Count > 0)
+        {
+            enemyHand.AddRange(currentEncounter.initialHand);
+        }
+        else
+        {
+            // 초기 핸드가 지정되지 않았다면 덱에서 3장 드로우
+            for(int i=0; i<3; i++)
+            {
+                if(enemyDeck.Count > 0)
+                {
+                    enemyHand.Add(enemyDeck[0]);
+                    enemyDeck.RemoveAt(0);
+                }
+            }
+        }
+        
+        if (enemyDeck.Count == 0 && AssaultCardData != null && currentEncounter.enemyDeck.Count == 0)
+        {
+             // 덱이 아예 없으면 테스트용으로 채움
+            for (int i = 0; i < 15; i++) enemyDeck.Add(AssaultCardData);
+        }
+
         foreach (var spawnInfo in currentEncounter.enemies)
         {
             if (spawnInfo.enemyCard != null)
             {
                 // 적 유닛 생성 (Player2 소유)
                 // 좌표는 데이터에 정의된 대로 (적 진영 기준이라면 변환 필요할 수 있음)
-                SpawnEnemyUnitForTest(spawnInfo.enemyCard, spawnInfo.position);
+                SpawnUnitInternal(spawnInfo.enemyCard, spawnInfo.position, Player.Player2, false);
             }
         }
     }
@@ -240,7 +314,7 @@ public class GameManager : MonoBehaviour
     // --- 테스트용 적 유닛 생성 ---
     private void SetupReconTest()
     {
-        if (boomCardData == null)
+        if (AssaultCardData == null)
         {
             Debug.LogError("테스트 실패: Boom Card Data가 할당되지 않았습니다.");
             return;
@@ -260,8 +334,8 @@ public class GameManager : MonoBehaviour
         Vector3Int topRowPos = new Vector3Int(-1, 9, 0); 
         Vector3Int bottomRowPos = new Vector3Int(-2, 10, 0);
 
-        SpawnEnemyUnitForTest(boomCardData, topRowPos);
-        SpawnEnemyUnitForTest(boomCardData, bottomRowPos);
+        SpawnEnemyUnitForTest(AssaultCardData, topRowPos);
+        SpawnEnemyUnitForTest(ScoutCardData, bottomRowPos);
     }
 
     private void SpawnEnemyUnitForTest(UnitCard card, Vector3Int cellLocation)
@@ -270,10 +344,10 @@ public class GameManager : MonoBehaviour
         GameObject newUnitObject = Instantiate(PlacementManager.Instance.unitPrefab, gameGrid.GetCellCenterWorld(cellLocation), Quaternion.identity);
         UnitInstance unitInstance = newUnitObject.GetComponent<UnitInstance>();
         
-        unitInstance.Initialize(card);
-        unitInstance.owner = Player.Player2; // 소유자를 Player2로 설정
+        unitInstance.Initialize(card, Player.Player2);
         unitInstance.location = cellLocation;
-        unitInstance.IsVisible = false; // 보이지 않게 설정
+        unitInstance.isRevealed = false; // 보이지 않게 설정
+        unitInstance.isIdentified = false; // 보이지 않게 설정
 
         RegisterUnit(cellLocation, unitInstance); // 레지스트리에 등록
 
@@ -303,19 +377,37 @@ public class GameManager : MonoBehaviour
         placementActionsTaken = 0; // 턴 시작 시 배치 행동 횟수 초기화
         DeselectUnit(); // 턴 시작 시 유닛 선택 해제
 
-        // 턴 시작 처리 (상태 이상 갱신, 패시브 발동, 행동력 초기화)
-        foreach (var unit in unitRegistry.Values)
+        Debug.Log("===== Player 1's Turn Starts (Settling Effects) =====");
+
+        // 1. 턴 시작 처리 (상태 이상 갱신, 데미지 결산 등을 먼저 수행)
+        // 리스트를 복사해서 순회 (사망으로 인한 레지스트리 변경 대비)
+        List<UnitInstance> units = new List<UnitInstance>(unitRegistry.Values);
+        foreach (var unit in units)
         {
-            if (unit.owner == currentPlayer)
+            if (unit != null && unit.owner == currentPlayer)
             {
                 unit.OnTurnStart();
             }
         }
 
-        Debug.Log("===== Player 1's Turn =====");
+        // 2. 잠시 대기하거나 연출 후 본격적인 카드 단계 진입
         Debug.Log("Phase: Placement - 카드를 1장 드로우하고 유닛/거점을 배치하세요.");
         HandManager.Instance.DrawCards(1);
         currentPhase = GamePhase.Placement; // 이벤트 발생
+    }
+
+    // --- 보드 상태 변화 알림 ---
+    public void TriggerBoardChangeEvents()
+    {
+        // 모든 유닛의 OnBoardChange 호출
+        List<UnitInstance> units = new List<UnitInstance>(unitRegistry.Values);
+        foreach (var unit in units)
+        {
+            if (unit != null && unit.sourceCardData is BaseCard baseCard && baseCard.passiveSkill != null)
+            {
+                baseCard.passiveSkill.OnBoardChange(unit);
+            }
+        }
     }
 
     // 플레이어 턴 종료 (배치/행동 단계가 모두 끝났을 때)
@@ -323,6 +415,10 @@ public class GameManager : MonoBehaviour
     {
         if (currentPlayer != Player.Player1) return;
 
+        // 턴 종료 시 모든 특수 모드 강제 종료
+        if (isTargetingSkill) ExitSkillTargetingMode();
+        if (isMovingUnit) ExitMoveMode();
+        
         DeselectUnit(); // 턴 종료 시에도 선택 해제
         Debug.Log("Player 1's turn ends.");
         currentPlayer = Player.Player2;
@@ -340,8 +436,9 @@ public class GameManager : MonoBehaviour
         }
 
         Debug.Log("Enemy's turn ended.");
+
         // 다음 플레이어 턴 시작
-        StartPlayerTurn();
+        Invoke("StartPlayerTurn", 1.0f);
     }
 
     // 참고: UI 버튼 등에서 호출할 함수들
@@ -350,6 +447,7 @@ public class GameManager : MonoBehaviour
     {
         if (currentPhase == GamePhase.Placement && currentPlayer == Player.Player1)
         {
+            if (isMovingUnit) ExitMoveMode(); // 이동 모드 강제 종료
             DeselectUnit(); // 단계 변경 시 선택 해제
             Debug.Log("Phase: Action - 전술 카드나 유닛 스킬을 사용하세요.");
             currentPhase = GamePhase.Action; // 이벤트 발생
@@ -400,17 +498,47 @@ public class GameManager : MonoBehaviour
     {
         if (selectedUnit == null) return;
 
+        // 이미 UIManager 등에서 currentSkillToUse를 설정했다면 그것을 사용하고, 
+        // 없다면 기본적으로 유닛의 ActiveSkill을 사용합니다.
+        if (currentSkillToUse == null)
+        {
+            currentSkillToUse = selectedUnit.ActiveSkill;
+        }
+
+        if (currentSkillToUse == null) return;
+
+        // 즉시 시전 스킬 처리 (타겟팅 불필요) - 여기서도 한 번 더 체크하여 안전하게 처리
+        if (currentSkillToUse.targetType == SkillTargetType.Self || currentSkillToUse.targetType == SkillTargetType.None)
+        {
+            int cost = selectedUnit.GetSkillCost(currentSkillToUse);
+            if (SpendEnergy(cost))
+            {
+                selectedUnit.hasUsedSkillThisTurn = true;
+                currentSkillToUse.Execute(selectedUnit, selectedUnit.location);
+                Debug.Log($"{selectedUnit.sourceCardData.cardName}의 즉시 시전 스킬({currentSkillToUse.skillName}) 발동!");
+                currentSkillToUse = null; // 사용 후 초기화
+            }
+            return;
+        }
+
         isTargetingSkill = true;
-        skillCaster = selectedUnit; // 스킬 시전자 저장
-        Debug.Log($"{skillCaster.sourceCardData.cardName}의 스킬 대상 지정 시작. 적 타일을 클릭하세요.");
+        skillCaster = selectedUnit; 
         
-        // 유닛 선택은 유지하되, 다른 행동을 막기 위해 UI를 비활성화 할 수도 있음
+        Debug.Log($"{skillCaster.sourceCardData.cardName}의 스킬({currentSkillToUse.skillName}) 대상 지정 시작. 타겟을 클릭하세요.");
     }
 
     public void ExitSkillTargetingMode()
     {
         isTargetingSkill = false;
         skillCaster = null;
+        currentSkillToUse = null; // 스킬 참조 해제
+        
+        // 스킬 모드 종료 시 붉은색 잔상(임시 타일) 제거
+        if (TileEffectManager.Instance != null)
+        {
+            TileEffectManager.Instance.ClearTemporaryTiles();
+        }
+        
         Debug.Log("스킬 대상 지정 모드 종료.");
     }
 
@@ -425,11 +553,11 @@ public class GameManager : MonoBehaviour
         }
 
         // 2. 유닛이 공개된 상태인지 확인
-        if (!unit.IsVisible)
-        {
-            Debug.Log("공개되지 않은 유닛은 이동할 수 없습니다.");
-            return;
-        }
+        //if (!unit.isIdentified)
+        //{
+        //    Debug.Log("공개되지 않은 유닛은 이동할 수 없습니다.");
+        //    return;
+        //}
 
         // 3. 이동 모드 시작
         isMovingUnit = true;
@@ -465,10 +593,20 @@ public class GameManager : MonoBehaviour
         // 3. 유닛 오브젝트의 실제 월드 위치 변경
         unitToMove.transform.position = gameGrid.GetCellCenterWorld(destination);
         
-        // 4. 행동 횟수 소모
+        // 4. [매의 눈] 상태 체크: 이동 시 위치가 발각됨
+        if (unitToMove.isTracking)
+        {
+            unitToMove.isRevealed = true;
+            Debug.Log($"[Tracking] {unitToMove.sourceCardData.cardName}이(가) 이동하여 위치가 노출되었습니다!");
+        }
+
+        // 5. 행동 횟수 소모
         placementActionsTaken++;
         
         Debug.Log($"{unitToMove.sourceCardData.cardName}이(가) {originalLocation}에서 {destination}으로 이동했습니다. 남은 행동: {placementActionsPerTurn - placementActionsTaken}");
+
+        // 보드 상태 변경 알림 (패시브 갱신)
+        TriggerBoardChangeEvents();
 
         // 5. 이동 모드 종료
         ExitMoveMode();
@@ -486,8 +624,11 @@ public class GameManager : MonoBehaviour
         {
             return player1Energy >= cost;
         }
-        // 현재는 Player1만 플레이하므로 Player2는 false를 반환합니다.
-        // else if (currentPlayer == Player.Player2) { return player2Energy >= cost; }
+        if (currentPlayer == Player.Player2)
+        {
+            return player2Energy >= cost;
+        }
+        
         return false;
     }
 
@@ -580,54 +721,301 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 간단한 적 AI의 행동을 처리하는 코루틴입니다.
+    /// 적 AI 턴 실행
     /// </summary>
     private IEnumerator ExecuteEnemyTurn()
     {
         Debug.Log("===== Enemy's Turn Starts =====");
 
-        // 적 유닛 턴 시작 처리 (상태 이상 갱신, 패시브 발동)
+        // 1. 턴 시작 처리
         foreach (var unit in unitRegistry.Values)
         {
-            if (unit.owner == Player.Player2)
+            if (unit.owner == Player.Player2) unit.OnTurnStart();
+        }
+
+        // AI 에너지 회복 (매 턴 100으로 리셋)
+        player2Energy = 100;
+        Debug.Log("Player 2 (AI) 에너지 회복 완료 (100).");
+
+        // 카드 드로우 시뮬레이션
+        if (enemyDeck.Count > 0)
+        {
+            CardData drawn = enemyDeck[0];
+            enemyDeck.RemoveAt(0);
+            enemyHand.Add(drawn);
+            Debug.Log($"[AI] 카드 드로우: {drawn.cardName}. 현재 핸드: {enemyHand.Count}");
+        }
+
+        // 2. 배치 단계 (Placement Phase)
+        // AI는 핸드에 카드가 있고 자리가 있으면 70% 확률로 배치, 아니면 이동 시도
+        bool placed = false;
+        if (enemyHand.Count > 0 && UnityEngine.Random.value < 0.7f)
+        {
+            placed = AI_TryPlaceCard();
+        }
+        
+        if (!placed)
+        {
+            AI_TryMoveUnit();
+        }
+
+        // 3. 행동 단계 (Action Phase) - 정찰 -> 공격
+        yield return StartCoroutine(AI_ActionPhase());
+
+        Debug.Log("===== Enemy's Turn Ends =====");
+        // 적 턴 종료 처리 (페이즈가 바뀌지 않았을 때만 호출)
+        if (currentPhase == GamePhase.EnemyTurn)
+        {
+            OnEnemyTurnEnd();
+        }
+    }
+
+    private bool AI_TryPlaceCard()
+    {
+        if (enemyHand.Count == 0) return false;
+
+        // 배치할 카드 선택 (랜덤)
+        CardData cardToPlace = enemyHand[UnityEngine.Random.Range(0, enemyHand.Count)];
+        
+        // 유효한 배치 타일 찾기
+        List<Vector3Int> validTiles = GetValidEnemyPlacementTiles();
+        
+        if (validTiles.Count > 0)
+        {
+            Vector3Int targetPos = validTiles[UnityEngine.Random.Range(0, validTiles.Count)];
+            SpawnUnitInternal(cardToPlace, targetPos, Player.Player2, false); // 적 유닛은 처음에 숨겨짐
+            enemyHand.Remove(cardToPlace);
+            Debug.Log($"[AI] {cardToPlace.cardName} 배치 @ {targetPos}");
+            return true;
+        }
+
+        return false;
+    }
+
+    private void AI_TryMoveUnit()
+    {
+        // 이동 가능한 유닛 찾기 (공개된 유닛만 이동 가능)
+        List<UnitInstance> movableUnits = unitRegistry.Values
+            .Where(u => u.owner == Player.Player2 && u.isIdentified) 
+            .ToList();
+
+        if (movableUnits.Count == 0) return;
+
+        UnitInstance unitToMove = movableUnits[UnityEngine.Random.Range(0, movableUnits.Count)];
+        List<Vector3Int> validMoves = GetValidMoveTiles(unitToMove);
+
+        if (validMoves.Count > 0)
+        {
+            Vector3Int dest = validMoves[UnityEngine.Random.Range(0, validMoves.Count)];
+            
+            // 이동 처리 (직접 레지스트리 업데이트)
+            DeregisterUnit(unitToMove.location);
+            RegisterUnit(dest, unitToMove);
+            unitToMove.location = dest;
+            unitToMove.transform.position = gameGrid.GetCellCenterWorld(dest);
+            
+            // [매의 눈] 상태 체크: 이동 시 위치가 발각됨
+            if (unitToMove.isTracking)
             {
-                unit.OnTurnStart();
+                unitToMove.isRevealed = true;
+                Debug.Log($"[AI Tracking] {unitToMove.sourceCardData.cardName}이(가) 이동하여 위치가 노출되었습니다!");
+            }
+
+            Debug.Log($"[AI] {unitToMove.sourceCardData.cardName} 이동 -> {dest}");
+        }
+    }
+
+    private IEnumerator AI_ActionPhase()
+    {
+        List<UnitInstance> myUnits = unitRegistry.Values.Where(u => u.owner == Player.Player2 && u.currentHealth > 0).ToList();
+
+        // 행동 우선순위:
+        // 1. Scout 유닛: 적이 아직 숨겨져 있다면 정찰 우선
+        // 2. Assault 유닛: 공개된 적이 있다면 공격
+
+        // Scout 유닛들 먼저 행동
+        var scouts = myUnits.Where(u => 
+            u.sourceCardData is UnitCard uc && uc.unitClass == Enums.UnitClass.Scout
+        ).ToList();
+
+        foreach (var unit in scouts)
+        {
+            if(unit.hasUsedSkillThisTurn) continue;
+            
+            // 아직 보이지 않는 플레이어 유닛이 있는가?
+            var hiddenEnemies = unitRegistry.Values.Where(u => u.owner == Player.Player1 && !u.isRevealed).ToList();
+            
+            if (hiddenEnemies.Count > 0)
+            {
+                // 숨겨진 적 근처를 정찰 (여기서는 간단히 해당 위치 타겟팅 - 실제 정찰 스킬은 범위를 가지므로 효과적)
+                Vector3Int targetPos;
+                if (UnityEngine.Random.value < 0.5f) {
+                    targetPos = hiddenEnemies[UnityEngine.Random.Range(0, hiddenEnemies.Count)].location;
+                    Debug.Log($"[AI Scout] {unit.sourceCardData.cardName} -> 의심스러운 위치 정찰 시도 {targetPos}");
+                } else {
+                    // 랜덤한 아군 타일 위치 선정
+                    List<Vector3Int> allyTiles = new List<Vector3Int>();
+                    if (PlacementManager.Instance != null && PlacementManager.Instance.allyTilemap != null)
+                    {
+                        var bounds = PlacementManager.Instance.allyTilemap.cellBounds;
+                        foreach (var pos in bounds.allPositionsWithin)
+                        {
+                            if (PlacementManager.Instance.allyTilemap.HasTile(pos))
+                            {
+                                allyTiles.Add(pos);
+                            }
+                        }
+                    }
+
+                    if (allyTiles.Count > 0)
+                    {
+                        targetPos = allyTiles[UnityEngine.Random.Range(0, allyTiles.Count)];
+                        Debug.Log($"[AI Scout] {unit.sourceCardData.cardName} -> 랜덤 아군 지역 정찰 시도 {targetPos}");
+                    }
+                    else
+                    {
+                        // Fallback (타일맵 정보를 가져오지 못했을 때)
+                        targetPos = new Vector3Int(UnityEngine.Random.Range(-2, 2), UnityEngine.Random.Range(0, 4), 0);
+                    }
+                }
+
+                if (unit.ActiveSkill != null && SpendEnergy(unit.GetSkillCost(unit.ActiveSkill)))
+                {
+                    unit.ActiveSkill.Execute(unit, targetPos);
+                    unit.hasUsedSkillThisTurn = true;
+                }
             }
         }
 
-        // 1초 대기 (플레이어가 상황을 인지할 시간)
-        yield return new WaitForSeconds(1.0f);
+        // Assault 유닛들 행동 (그리고 남은 Scout도 공격 스킬이 있다면 사용)
+        // Logistics는? 일단 공격 가능하면 공격 (보조 스킬 로직은 추후 고도화)
+        var attackers = myUnits.Where(u => !u.hasUsedSkillThisTurn).ToList();
 
-        // 행동 가능한 모든 적 유닛과 대상이 될 아군 유닛 목록을 만듭니다.
-        List<UnitInstance> enemyUnits = unitRegistry.Values.Where(u => u.owner == Player.Player2 && u.currentHealth > 0).ToList();
-        List<UnitInstance> playerUnits = unitRegistry.Values.Where(u => u.owner == Player.Player1 && u.currentHealth > 0).ToList();
-
-        // 공격할 적이나 공격받을 아군이 없으면 턴을 즉시 종료합니다.
-        if (enemyUnits.Count > 0 && playerUnits.Count > 0)
+        foreach (var unit in attackers)
         {
-            // 무작위로 공격자와 대상을 선택합니다.
-            UnitInstance attacker = enemyUnits[UnityEngine.Random.Range(0, enemyUnits.Count)];
-            UnitInstance target = playerUnits[UnityEngine.Random.Range(0, playerUnits.Count)];
+            // 공개된 적 유닛 찾기
+            var visibleEnemies = unitRegistry.Values.Where(u => u.owner == Player.Player1 && u.isRevealed && u.currentHealth > 0).ToList();
 
-            Debug.Log($"Enemy AI: {attacker.sourceCardData.cardName}이(가) {target.sourceCardData.cardName}을(를) 공격합니다!");
-
-            // 타일 클릭과 동일하게 스킬을 실행합니다.
-            UnitCard attackerCard = attacker.sourceCardData as UnitCard;
-            if (attackerCard != null && attackerCard.activeSkill != null)
+            if (visibleEnemies.Count > 0)
             {
-                attackerCard.activeSkill.Execute(attacker, target.location);
-            }
+                // 가장 가까운 적 찾기
+                UnitInstance target = visibleEnemies
+                    .OrderBy(e => Vector3.Distance(unit.transform.position, e.transform.position))
+                    .FirstOrDefault();
 
-            // 결과 확인을 위해 1초 더 대기
-            yield return new WaitForSeconds(1.0f);
+                if (target != null)
+                {
+                     if (unit.ActiveSkill != null && SpendEnergy(unit.GetSkillCost(unit.ActiveSkill)))
+                     {
+                        Debug.Log($"[AI Attack] {unit.sourceCardData.cardName} -> {target.sourceCardData.cardName}");
+                        unit.ActiveSkill.Execute(unit, target.location);
+                        unit.hasUsedSkillThisTurn = true;
+                     }
+                }
+            }
+            else
+            {
+                // 공개된 적이 없다면? 
+                // 필드에 적 유닛이 아예 없다면 본체 직접 공격 (규칙)
+                bool anyEnemyExists = unitRegistry.Values.Any(u => u.owner == Player.Player1);
+                
+                if (!anyEnemyExists)
+                {
+                    Debug.Log($"[AI] 적 유닛이 없어 직접 공격 기회! (구현 필요)");
+                }
+            }
+        }
+        yield break;
+    }
+
+    private List<Vector3Int> GetValidEnemyPlacementTiles()
+    {
+        List<Vector3Int> valid = new List<Vector3Int>();
+        
+        if (PlacementManager.Instance != null && PlacementManager.Instance.enemyTilemap != null)
+        {
+            UnityEngine.Tilemaps.Tilemap enemyMap = PlacementManager.Instance.enemyTilemap;
+            
+            // 타일맵의 Bounds 내 모든 좌표 순회
+            foreach (var pos in enemyMap.cellBounds.allPositionsWithin)
+            {
+                // 실제 타일이 존재하는 곳이고, 유닛이 없는 곳
+                if (enemyMap.HasTile(pos) && !unitRegistry.ContainsKey(pos))
+                {
+                    valid.Add(pos);
+                }
+            }
         }
         else
         {
-            Debug.Log("행동할 적 유닛 또는 대상이 없어 적 턴을 스킵합니다.");
+            // Fallback (기존 로직)
+            for (int x = -5; x <= 5; x++)
+            {
+                for (int y = 7; y <= 11; y++) 
+                {
+                    Vector3Int pos = new Vector3Int(x, y, 0);
+                    if (!unitRegistry.ContainsKey(pos)) 
+                    {
+                        valid.Add(pos); 
+                    }
+                }
+            }
+        }
+        return valid;
+    }
+
+    private List<Vector3Int> GetValidMoveTiles(UnitInstance unit)
+    {
+        List<Vector3Int> valid = new List<Vector3Int>();
+        // 간단히 상하좌우 1칸 체크
+        Vector3Int[] directions = new Vector3Int[] {
+            new Vector3Int(1, 0, 0), new Vector3Int(-1, 0, 0),
+            new Vector3Int(0, 1, 0), new Vector3Int(0, -1, 0)
+        };
+        
+        foreach (var dir in directions)
+        {
+            Vector3Int target = unit.location + dir;
+            
+            // 1. 이미 유닛이 있는 곳은 제외
+            if (unitRegistry.ContainsKey(target)) continue;
+
+            // 2. 적군 타일맵 위인지 확인 (AI는 적군 영토 내에서만 이동)
+            if (PlacementManager.Instance != null && PlacementManager.Instance.enemyTilemap != null)
+            {
+                if (!PlacementManager.Instance.enemyTilemap.HasTile(target)) continue;
+            }
+
+            valid.Add(target);
+        }
+        return valid;
+    }
+
+    // 내부 유닛 생성 로직 (AI 및 테스트 공용)
+    private UnitInstance SpawnUnitInternal(CardData card, Vector3Int cellLocation, Player owner, bool isVisible)
+    {
+        if (PlacementManager.Instance == null) return null;
+
+        // PlacementManager의 프리팹을 사용하여 유닛 오브젝트 생성
+        GameObject newUnitObject = Instantiate(PlacementManager.Instance.unitPrefab, gameGrid.GetCellCenterWorld(cellLocation), Quaternion.identity);
+        UnitInstance unitInstance = newUnitObject.GetComponent<UnitInstance>();
+        
+        unitInstance.Initialize(card, owner); // Owner 전달
+        unitInstance.location = cellLocation;
+        unitInstance.isRevealed = isVisible; 
+        unitInstance.isIdentified = isVisible; // 가시성 설정
+
+        RegisterUnit(cellLocation, unitInstance); 
+
+        // 스프라이트 설정
+        SpriteRenderer sr = newUnitObject.GetComponent<SpriteRenderer>();
+        Sprite spriteToUse = (card is UnitCard u) ? u.unitSprite : (card is BaseCard b ? b.unitSprite : null);
+        
+        if (sr != null && spriteToUse != null)
+        {
+            sr.sprite = spriteToUse;
         }
 
-        Debug.Log("===== Enemy's Turn Ends =====");
-        // 적 턴 종료 처리
-        OnEnemyTurnEnd();
+        return unitInstance;
     }
 }

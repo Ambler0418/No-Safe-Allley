@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro; // TextMeshPro를 사용하기 위해 추가
+using System.Linq; // Linq 사용을 위해 추가
 
 public class UIManager : MonoBehaviour
 {
@@ -21,7 +22,7 @@ public class UIManager : MonoBehaviour
     public GameObject selectedUnitPanel; // 유닛 선택 시 활성화될 패널
     public TextMeshProUGUI selectedUnitNameText; // 선택된 유닛 이름
     
-    // --- 추가된 상세 정보 UI ---
+    // --- 상세 정보 UI ---
     public TextMeshProUGUI selectedUnitHPText;
     public TextMeshProUGUI selectedUnitAttackText;
     public TextMeshProUGUI selectedUnitDefenseText;
@@ -34,6 +35,15 @@ public class UIManager : MonoBehaviour
     public Button useConditionalSkillButton; // 조건부 스킬 버튼
     public TextMeshProUGUI useConditionalSkillButtonText;
 
+    [Header("Special UI")]
+    public TextMeshProUGUI deadEnemyCountText; // I004용 사망자 수 표시
+
+    public TextMeshProUGUI enemyUnitCountText; // 디버그용 텍스트 필드
+    private bool hasCheckedDeckForI004 = false;
+    private bool hasI004InDeck = false;
+    private bool hasCheckedDeckForS004 = false;
+    private bool hasS004InDeck = false;
+
     void Start()
     {
         // 버튼 클릭 이벤트에 함수 연결
@@ -41,6 +51,10 @@ public class UIManager : MonoBehaviour
         if (enemyTurnButton != null) enemyTurnButton.onClick.AddListener(OnEnemyTurnButtonClicked);
         if (useSkillButton != null) useSkillButton.onClick.AddListener(OnUseSkillButtonClicked);
         if (useConditionalSkillButton != null) useConditionalSkillButton.onClick.AddListener(OnUseConditionalSkillButtonClicked);
+
+        // 초기 UI 숨김
+        if (deadEnemyCountText != null) deadEnemyCountText.gameObject.SetActive(false);
+        if (enemyUnitCountText != null) enemyUnitCountText.gameObject.SetActive(false);
     }
 
     void Update()
@@ -103,9 +117,45 @@ public class UIManager : MonoBehaviour
             // 에너지 확인 (GetSkillCost 반영)
             if (GameManager.Instance.HasEnoughEnergy(selectedUnit.GetSkillCost(skillToUse)))
             {
-                // GameManager에 스킬 정보 전달 및 타겟팅 모드 진입
-                GameManager.Instance.currentSkillToUse = skillToUse;
-                GameManager.Instance.EnterSkillTargetingMode();
+                // --- 개선된 즉시 시전 판정 로직 ---
+                // 1. targetType이 Self이거나 None(전역/랜덤)인 경우
+                // 2. AreaPattern이 없고 actionEffects 이름에 Self가 들어가는 경우 (기존 로직 보완)
+                bool isImmediate = (skillToUse.targetType == SkillTargetType.Self || skillToUse.targetType == SkillTargetType.None);
+                
+                if (!isImmediate && skillToUse.areaPattern == null)
+                {
+                    if (skillToUse.actionEffects == null || skillToUse.actionEffects.Count == 0 || 
+                        (skillToUse.actionEffects.Count > 0 && skillToUse.actionEffects[0].name.Contains("Self")))
+                    {
+                        isImmediate = true;
+                    }
+                }
+
+                bool isGlobal = skillToUse.areaPattern != null && skillToUse.areaPattern.IsGlobal;
+
+                Debug.Log($"[Skill Click] {skillToUse.skillName}: Immediate={isImmediate}, Global={isGlobal}");
+
+                if (isImmediate || isGlobal)
+                {
+                    // 즉시 실행
+                    int finalCost = selectedUnit.GetSkillCost(skillToUse);
+                    if (GameManager.Instance.HasEnoughEnergy(finalCost))
+                    {
+                        // 스킬을 먼저 실행해보고 성공 여부를 확인
+                        if (skillToUse.Execute(selectedUnit, selectedUnit.location))
+                        {
+                            GameManager.Instance.SpendEnergy(finalCost);
+                            selectedUnit.hasUsedSkillThisTurn = true;
+                            UpdateUI(); // 즉시 UI 갱신
+                        }
+                    }
+                }
+                else
+                {
+                    // GameManager에 스킬 정보 전달 및 타겟팅 모드 진입
+                    GameManager.Instance.currentSkillToUse = skillToUse;
+                    GameManager.Instance.EnterSkillTargetingMode();
+                }
             }
             else
             {
@@ -166,6 +216,51 @@ public class UIManager : MonoBehaviour
         if (playerEnergyText != null) playerEnergyText.text = $"Energy: {gm.player1Energy}";
         if (enemyHPText != null) enemyHPText.text = $"Enemy HP: {gm.player2Health}";
         if (enemyEnergyText != null) enemyEnergyText.text = $"Enemy Energy: {gm.player2Energy}";
+
+        // I004 UI 업데이트
+        if (deadEnemyCountText != null)
+        {
+            if (!hasCheckedDeckForI004)
+            {
+                if (HandManager.Instance != null)
+                {
+                    // 덱, 손패, 백업 덱을 모두 검사하여 I004(네크로필리아)가 있는지 확인
+                    hasI004InDeck = HandManager.Instance.CheckDeckContainsCard("I004");
+                    
+                    hasCheckedDeckForI004 = true;
+                    
+                    // 카드가 없다면 텍스트를 비활성화
+                    deadEnemyCountText.gameObject.SetActive(hasI004InDeck);
+                }
+            }
+
+            if (hasI004InDeck)
+            {
+                deadEnemyCountText.text = $"사망: {gm.deadEnemyCount}";
+            }
+        }
+
+        if (enemyUnitCountText != null)
+        {
+            if (!hasCheckedDeckForS004)
+            {
+                if (HandManager.Instance != null)
+                {
+                    // 덱, 손패, 백업 덱을 모두 검사하여 S004(네크로필리아)가 있는지 확인
+                    hasS004InDeck = HandManager.Instance.CheckDeckContainsCard("S004");
+                    
+                    hasCheckedDeckForS004 = true;
+                    
+                    // 카드가 없다면 텍스트를 비활성화
+                    enemyUnitCountText.gameObject.SetActive(hasS004InDeck);
+                }
+            }
+
+            if (hasS004InDeck)
+            {
+                enemyUnitCountText.text = $"적 유닛 수: {gm.unitRegistry.Values.Where(u => (u.owner == GameManager.Player.Player2)&&(u.currentHealth>0)).Count()}";
+            }
+        }
     }
 
     private void UpdateSelectedUnitPanel(GameManager gm)
@@ -184,9 +279,33 @@ public class UIManager : MonoBehaviour
 
         UnitInstance selectedUnit = gm.selectedUnit;
         
+        // 적 유닛이고 식별되지 않았다면 정보 숨김
+        if (selectedUnit.owner != GameManager.Player.Player1 && !selectedUnit.isIdentified)
+        {
+            if (selectedUnitNameText != null) selectedUnitNameText.text = "미식별 유닛";
+            if (selectedUnitHPText != null) selectedUnitHPText.text = "HP: ???";
+            if (selectedUnitAttackText != null) selectedUnitAttackText.text = "ATK: ???";
+            if (selectedUnitDefenseText != null) selectedUnitDefenseText.text = "DEF: ???";
+            if (selectedUnitBuffsText != null) selectedUnitBuffsText.text = "";
+            
+            // 버튼 비활성화
+            if (useSkillButton != null) { useSkillButton.interactable = false; useSkillButtonText.text = "???"; }
+            if (useConditionalSkillButton != null) { useConditionalSkillButton.gameObject.SetActive(false); }
+            return;
+        }
+
         // UI 컴포넌트 유효성 검사 (Text 컴포넌트는 null일 수도 있으므로 체크)
         if (selectedUnitNameText != null) selectedUnitNameText.text = selectedUnit.sourceCardData.cardName;
         
+        // --- 가시성 상태 텍스트 생성 ---
+        string visibilityStatus = "";
+        if (selectedUnit.owner == GameManager.Player.Player1)
+        {
+            if (selectedUnit.isIdentified) visibilityStatus = "<color=red>[정보 식별됨]</color>\n";
+            else if (selectedUnit.isRevealed) visibilityStatus = "<color=yellow>[위치 노출됨]</color>\n";
+            else visibilityStatus = "<color=green>[은신 중]</color>\n";
+        }
+
         // --- 추가된 상세 정보 업데이트 ---
         if (selectedUnitHPText != null) selectedUnitHPText.text = $"HP: {selectedUnit.currentHealth} / {selectedUnit.maxHealth}";
         if(selectedUnit.sourceCardData is UnitCard unitData)
@@ -202,27 +321,51 @@ public class UIManager : MonoBehaviour
 
         if (selectedUnitBuffsText != null)
         {
+            string buffs = visibilityStatus; // 가시성 상태(은신/노출)를 처음에 추가
+            
             if (selectedUnit.activeStatuses.Count > 0)
             {
-                string buffs = "";
+                System.Collections.Generic.HashSet<string> displayedNames = new System.Collections.Generic.HashSet<string>();
+
                 foreach (var status in selectedUnit.activeStatuses)
                 {
-                    buffs += $"{status.type}({status.value}) {status.remainingTurns}턴\n";
+                    // 이름이 없으면 타입 이름 사용 (이전 호환성)
+                    string displayName = string.IsNullOrEmpty(status.name) ? status.type.ToString() : status.name;
+
+                    // 이미 표시된 이름이면 건너뜀 (중복 표시 방지)
+                    if (displayedNames.Contains(displayName)) continue;
+
+                    buffs += $"{displayName} ({status.remainingTurns}턴)\n";
+                    displayedNames.Add(displayName);
                 }
                 selectedUnitBuffsText.text = buffs;
             }
             else
             {
-                selectedUnitBuffsText.text = "상태 이상 없음";
+                // 상태 이상이 없더라도 가시성 정보(buffs)가 있다면 그것을 표시
+                selectedUnitBuffsText.text = string.IsNullOrEmpty(buffs) ? "상태 이상 없음" : buffs;
             }
         }
         // -------------------------
+
+        bool isMyUnit = (selectedUnit.owner == gm.currentPlayer);
+        bool isActionPhase = (gm.currentPhase == GameManager.GamePhase.Action);
 
         // --- 스킬 1 버튼 업데이트 ---
         SkillEffect skill1 = selectedUnit.ActiveSkill;
         if (useSkillButton != null && useSkillButtonText != null)
         {
-            if (selectedUnit.hasUsedSkillThisTurn)
+            if (!isMyUnit)
+            {
+                useSkillButton.interactable = false;
+                useSkillButtonText.text = "적 유닛";
+            }
+            else if (!isActionPhase)
+            {
+                useSkillButton.interactable = false;
+                useSkillButtonText.text = "행동 단계 아님";
+            }
+            else if (selectedUnit.hasUsedSkillThisTurn)
             {
                 useSkillButton.interactable = false;
                 useSkillButtonText.text = "사용 완료";
@@ -251,26 +394,39 @@ public class UIManager : MonoBehaviour
             else
             {
                 useConditionalSkillButton.gameObject.SetActive(true);
-                bool canUse = selectedUnit.CanUseConditionalSkill();
-                int finalCost = selectedUnit.GetSkillCost(skill2);
-
-                if (selectedUnit.hasUsedSkillThisTurn)
+                
+                if (!isMyUnit)
+                {
+                    useConditionalSkillButton.interactable = false;
+                    useConditionalSkillButtonText.text = "적 유닛";
+                }
+                else if (!isActionPhase)
+                {
+                    useConditionalSkillButton.interactable = false;
+                    useConditionalSkillButtonText.text = "행동 단계 아님";
+                }
+                else if (selectedUnit.hasUsedSkillThisTurn)
                 {
                     useConditionalSkillButton.interactable = false;
                     useConditionalSkillButtonText.text = "사용 완료";
                 }
-                else if (canUse)
-                {
-                    useConditionalSkillButton.interactable = true;
-                    useConditionalSkillButtonText.text = finalCost > 0 ? $"{skill2.skillName} ({finalCost})" : $"{skill2.skillName} (무료)";
-                }
                 else
                 {
-                    useConditionalSkillButton.interactable = false;
-                    useConditionalSkillButtonText.text = "조건 미충족";
+                    bool canUse = selectedUnit.CanUseConditionalSkill();
+                    int finalCost = selectedUnit.GetSkillCost(skill2);
+
+                    if (canUse)
+                    {
+                        useConditionalSkillButton.interactable = true;
+                        useConditionalSkillButtonText.text = finalCost > 0 ? $"{skill2.skillName} ({finalCost})" : $"{skill2.skillName} (무료)";
+                    }
+                    else
+                    {
+                        useConditionalSkillButton.interactable = false;
+                        useConditionalSkillButtonText.text = "조건 미충족";
+                    }
                 }
             }
         }
     }
 }
-

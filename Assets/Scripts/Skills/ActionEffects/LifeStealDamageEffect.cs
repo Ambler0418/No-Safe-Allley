@@ -5,12 +5,12 @@ public class LifeStealDamageEffect : DealDamageEffect
 {
     public float lifeStealPercent = 0.5f;
 
-    public override void Apply(UnitInstance caster, Vector3Int targetTile)
+    public override bool Apply(UnitInstance caster, Vector3Int targetTile)
     {
         if (caster == null)
         {
             Debug.LogError("[Life Steal Damage] 시전자(caster)가 없습니다.");
-            return;
+            return false;
         }
 
         UnitInstance targetUnit = GameManager.Instance.GetUnitAt(targetTile);
@@ -35,18 +35,20 @@ public class LifeStealDamageEffect : DealDamageEffect
                     caster.heal(healAmount);
                     Debug.Log($"[Life Steal] {caster.sourceCardData.cardName}이 {healAmount}만큼 흡혈했습니다.");
                 }
+                return true;
             }
             else
             {
                 // 데미지 0이면 효과 없음 (IsVisible 처리 등은 부모에게 맡길 수 없음)
-                targetUnit.IsVisible = true;
+                targetUnit.isIdentified = true;
+                return true;
             }
         }
         else
         {
             // 빈 땅 공격 등은 부모 로직(직접 공격)을 따를지 말지 결정.
             // 흡혈 스킬이므로 직접 공격 시에는 흡혈 안 함.
-            base.Apply(caster, targetTile);
+            return base.Apply(caster, targetTile);
         }
     }
 }

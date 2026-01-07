@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60a66167569e2084caf33ace57ad6aba, type: 3}
+  m_Name: HackAndSlash
+  m_EditorClassIdentifier: 
+  skillName: "\uB09C\uB3C4\uC9C8"
+  skillDescription: "\uB2E8\uC77C \uC801 120% \uACF5\uACA9. \uC783\uC740 \uCCB4\uB825
+    20%\uB2F9 +10%"
+  energyCost: 3
+  targetType: 0
+  maxRange: 100
+  areaPattern: {fileID: 11400000, guid: 187cf5269c6a00e48bdf4a051dcf92cb, type: 2}
+  actionEffects:
+  - {fileID: 11400000, guid: 28c75900c87b65f40ab4820237a83dcf, type: 2}
+  casterEffects: []

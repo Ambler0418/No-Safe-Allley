@@ -8,7 +8,7 @@ public class RevealRandomEnemyEffect : ActionEffect
     public int revealCount = 2;
     public bool resetDeadCount = true;
 
-    public override void Apply(UnitInstance caster, Vector3Int targetTile)
+    public override bool Apply(UnitInstance caster, Vector3Int targetTile)
     {
         GameManager.Player opponent = (caster != null && caster.owner == GameManager.Player.Player1) 
                                       ? GameManager.Player.Player2 
@@ -16,13 +16,13 @@ public class RevealRandomEnemyEffect : ActionEffect
 
         // 숨겨진 적 목록 가져오기
         List<UnitInstance> hiddenEnemies = GameManager.Instance.unitRegistry.Values
-            .Where(u => u.owner == opponent && !u.IsVisible)
+            .Where(u => u.owner == opponent && !u.isRevealed)
             .ToList();
 
         if (hiddenEnemies.Count == 0)
         {
             Debug.Log("[Reveal] 정찰할 수 있는 숨겨진 적이 없습니다.");
-            return;
+            return true;
         }
 
         // 랜덤 셔플 및 정찰
@@ -33,7 +33,7 @@ public class RevealRandomEnemyEffect : ActionEffect
             UnitInstance target = hiddenEnemies[randomIndex];
             hiddenEnemies[randomIndex] = hiddenEnemies[i];
             
-            target.IsVisible = true;
+            target.isRevealed = true;
             TileEffectManager.Instance.HighlightReconTile(target.location);
             Debug.Log($"[Reveal] 무작위 적 발견: {target.sourceCardData.cardName} at {target.location}");
         }
@@ -42,5 +42,7 @@ public class RevealRandomEnemyEffect : ActionEffect
         {
             GameManager.Instance.ResetDeadEnemyCount();
         }
+
+        return true;
     }
 }

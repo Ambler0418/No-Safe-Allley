@@ -39,6 +39,7 @@ public class HandManager : MonoBehaviour
     private List<UICard> cardsInHand = new List<UICard>();
     private UICard hoveredCard = null;
     private UICard draggedCard = null;
+    public bool IsDragging => draggedCard != null; // 드래그 중 여부 확인용 프로퍼티
     private bool isHandExpanded = false;
     private float transitionProgress = 0f; // 0 = retracted, 1 = expanded
 
@@ -178,6 +179,41 @@ public class HandManager : MonoBehaviour
     public void OnCardHoverExit(UICard card) { if (hoveredCard == card) hoveredCard = null; }
     public void OnCardDragBegin(UICard card) => draggedCard = card;
     public void OnCardDragEnd(UICard card) { if (draggedCard == card) draggedCard = null; }
+
+    /// <summary>
+    /// 덱(초기 덱, 현재 덱, 손패 포함)에 특정 문자열을 이름(파일명 또는 카드명)에 포함하는 카드가 있는지 확인합니다.
+    /// 예: "I004" 또는 "네크로필리아"
+    /// </summary>
+    public bool CheckDeckContainsCard(string searchString)
+    {
+        // 1. 초기 백업 덱 확인 (게임 시작 시점의 덱)
+        if (runtimeDeckBackup != null && runtimeDeckBackup.Count > 0)
+        {
+            foreach (var card in runtimeDeckBackup)
+            {
+                if (card != null && (card.name.Contains(searchString) || card.cardName.Contains(searchString))) return true;
+            }
+            // 백업 덱이 있다면 여기서 결론이 나야 하지만, 중간에 카드가 추가되는 경우를 대비해 아래도 확인 가능
+            // 하지만 백업 덱이 '초기 덱'을 의미한다면 여기서 true면 끝.
+            return false;
+        }
+
+        // 2. 현재 덱 확인 (백업이 아직 안 되었거나 비어있을 경우)
+        foreach (var card in runtimeDeck)
+        {
+            if (card != null && (card.name.Contains(searchString) || card.cardName.Contains(searchString))) return true;
+        }
+
+        // 3. 손패 확인
+        foreach (var uiCard in cardsInHand)
+        {
+            if (uiCard.cardData != null && 
+               (uiCard.cardData.name.Contains(searchString) || uiCard.cardData.cardName.Contains(searchString)))
+                return true;
+        }
+        
+        return false;
+    }
 
     // --- 핵심 레이아웃 로직 ---
     void UpdateHandLayout()

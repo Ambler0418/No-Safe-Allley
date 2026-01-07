@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60a66167569e2084caf33ace57ad6aba, type: 3}
+  m_Name: Fear
+  m_EditorClassIdentifier: 
+  skillName: "\uACF5\uD3EC"
+  skillDescription: "\uC801 \uC804\uCCB4 \uACF5\uACA9\uB825 -50 (\uC544\uAD70 \uC218
+    \uBE44\uB840, \uCD5C\uB300 4\uC2A4\uD0DD, 2\uD134)"
+  energyCost: 4
+  targetType: 3
+  maxRange: 1
+  areaPattern: {fileID: 11400000, guid: 29133b590fa485946b3ed245bcd92f74, type: 2}
+  actionEffects:
+  - {fileID: 11400000, guid: cc0255ddbbb9c7f4d818c997b26ef113, type: 2}
+  casterEffects: []

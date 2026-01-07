@@ -4,6 +4,7 @@ using UnityEngine;
 public class CountScalingStatusEffect : ActionEffect
 {
     [Header("Status To Apply")]
+    public string statusName; // 추가
     public Enums.StatusType statusType;
     public int valuePerStack;  // 스택당 감소량 (여기선 50)
     public int duration;
@@ -13,7 +14,7 @@ public class CountScalingStatusEffect : ActionEffect
     public Enums.Faction targetFaction = Enums.Faction.IronFrame;
     public bool useFactionCheck = false;
 
-    public override void Apply(UnitInstance caster, Vector3Int targetTile)
+    public override bool Apply(UnitInstance caster, Vector3Int targetTile)
     {
         // 내 필드 아군 유닛 수 계산
         int allyCount = 0;
@@ -38,9 +39,11 @@ public class CountScalingStatusEffect : ActionEffect
         UnitInstance targetUnit = GameManager.Instance.GetUnitAt(targetTile);
         if (targetUnit != null)
         {
-            StatusEffect debuff = new StatusEffect(statusType, totalValue, duration);
+            StatusEffect debuff = new StatusEffect(statusName, statusType, totalValue, duration, false, caster);
             targetUnit.AddStatus(debuff);
-            Debug.Log($"[Fear] 아군 {allyCount}명 -> {stacks}스택. {targetUnit.sourceCardData.cardName}에게 {statusType} ({totalValue}) 부여.");
+            Debug.Log($"[Fear] 아군 {allyCount}명 -> {stacks}스택. {targetUnit.sourceCardData.cardName}에게 {statusName}({totalValue}) 부여.");
+            return true;
         }
+        return false;
     }
 }

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60a66167569e2084caf33ace57ad6aba, type: 3}
+  m_Name: MartialLaw
+  m_EditorClassIdentifier: 
+  skillName: "\uACC4\uC5C4\uB839 \uC120\uD3EC"
+  skillDescription: "\uBAA8\uB4E0 \uC815\uBD80 \uC720\uB2DB \uACF5\uACA9\uB825/ \uBC29\uC5B4\uB825
+    +50 (2\uD134)"
+  energyCost: 4
+  targetType: 1
+  maxRange: 1
+  areaPattern: {fileID: 11400000, guid: 1f3c68f02a7c1814cab6cffef80a2d8b, type: 2}
+  actionEffects:
+  - {fileID: 11400000, guid: bf4fbdb5022df3c44bd1d4e2d1d8a530, type: 2}
+  - {fileID: 11400000, guid: bca326db5c5cbca4eb9813ccf27db96d, type: 2}
+  casterEffects: []
