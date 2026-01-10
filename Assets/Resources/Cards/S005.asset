@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da155dd29256ec944b23e9de3ea85986, type: 3}
+  m_Name: S005
+  m_EditorClassIdentifier: 
+  cardName: "\uC740\uC2E0\uCC98"
+  cardType: 2
+  faction: 1
+  description: 
+  artwork: {fileID: 6455183087948501798, guid: 2f0ee39c18d5d7143baf6a0e39234ca2, type: 3}
+  maxHealth: 1500
+  unitSprite: {fileID: 2920070367447021475, guid: 5d0063abcd5e9d64e8c4a06eaf0c96fd, type: 3}
+  passiveSkill: {fileID: 11400000, guid: 56496b5271260d548970d38e0515ba01, type: 2}

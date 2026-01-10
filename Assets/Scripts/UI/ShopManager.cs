@@ -82,8 +82,9 @@ public class ShopManager : MonoBehaviour
 
             Debug.Log($"{itemToBuy.card.cardName} 구매 성공!");
 
-            // 4. 골드 UI 업데이트
+            // 4. 골드 UI 업데이트 및 데이터 저장
             UpdateGoldDisplay();
+            CoreManager.Instance.SaveGameData(); // 파일에 즉시 저장
             
             // TODO: 구매 성공 시 사운드, 시각 효과 등 피드백 추가
         }

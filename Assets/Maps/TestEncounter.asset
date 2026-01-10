@@ -12,12 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 885672be77215ad4a956b12c68d4095e, type: 3}
   m_Name: TestEncounter
   m_EditorClassIdentifier: Assembly-CSharp::Map.BattleEncounter
-  encounterName: 
+  encounterName: "\uD14C\uC2A4\uD2B8\uC6A9 Encounter"
   description: 
   enemies:
-  - position: {x: -1, y: 9, z: 0}
+  - position: {x: -2, y: 8, z: 0}
     enemyCard: {fileID: 11400000, guid: beb615bbb95f30d45b19724459696f70, type: 2}
-  - position: {x: 0, y: 9, z: 0}
-    enemyCard: {fileID: 11400000, guid: c9fafe27898a340469486f04b0f65afb, type: 2}
-  - position: {x: 2, y: 10, z: 0}
-    enemyCard: {fileID: 11400000, guid: 1fb898a09f4998a409e4b72c5ed6394e, type: 2}
+  initialHand: []
+  enemyDeck: []

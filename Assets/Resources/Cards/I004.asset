@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 015edef490fbcb342a3d1b4d88ddbacd, type: 3}
+  m_Name: I004
+  m_EditorClassIdentifier: Assembly-CSharp::UnitCard
+  cardName: "\uB124\uD06C\uB85C\uD544\uB9AC\uC544"
+  cardType: 0
+  faction: 2
+  description: 
+  artwork: {fileID: 2829606559142220587, guid: fb19c799d0ae2184cb65a789dfb8a3d9, type: 3}
+  unitSprite: {fileID: 3756282102072125371, guid: 14b4a809ea952ee44aed2d299c613cca, type: 3}
+  rarity: 3
+  unitClass: 1
+  maxHealth: 1100
+  attack: 100
+  defense: 420
+  activeSkill: {fileID: 11400000, guid: f609541d9b120b7458a27f806f1008b7, type: 2}
+  conditionalSkill: {fileID: 11400000, guid: 663f254cfccf87141a0c75568e79263d, type: 2}
+  conditionalSkillCondition: DeadEnemies_3

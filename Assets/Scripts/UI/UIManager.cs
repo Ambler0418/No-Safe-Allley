@@ -8,6 +8,7 @@ public class UIManager : MonoBehaviour
     [Header("Buttons")]
     public Button myTurnButton;
     public Button enemyTurnButton;
+    public Button enemyProfileButton; // 적 본체(프로필) 클릭용 버튼
 
     [Header("Button Texts")]
     public TextMeshProUGUI myTurnButtonText;
@@ -51,6 +52,7 @@ public class UIManager : MonoBehaviour
         if (enemyTurnButton != null) enemyTurnButton.onClick.AddListener(OnEnemyTurnButtonClicked);
         if (useSkillButton != null) useSkillButton.onClick.AddListener(OnUseSkillButtonClicked);
         if (useConditionalSkillButton != null) useConditionalSkillButton.onClick.AddListener(OnUseConditionalSkillButtonClicked);
+        if (enemyProfileButton != null) enemyProfileButton.onClick.AddListener(OnEnemyProfileClicked);
 
         // 초기 UI 숨김
         if (deadEnemyCountText != null) deadEnemyCountText.gameObject.SetActive(false);
@@ -93,6 +95,21 @@ public class UIManager : MonoBehaviour
         GameManager.Instance.OnEnemyTurnEnd();
     }
 
+    // '적 프로필' 버튼 클릭 시 (직격 공격 시도)
+    private void OnEnemyProfileClicked()
+    {
+        if (GameManager.Instance.isTargetingSkill)
+        {
+            // 스킬 타겟팅 모드라면 스킬로서의 직격 공격 시도
+            GameManager.Instance.HandleEnemyProfileClickInTargetingMode();
+        }
+        else
+        {
+            // 타겟팅 모드가 아니라면 일반 직격 공격 시도 (혹은 무반응, 기획에 따라 결정)
+            GameManager.Instance.TryDirectAttack();
+        }
+    }
+
     // '스킬 사용' 버튼 클릭 시
     private void OnUseSkillButtonClicked()
     {
@@ -108,6 +125,12 @@ public class UIManager : MonoBehaviour
     private void HandleSkillClick(bool isConditional)
     {
         if (GameManager.Instance.selectedUnit == null) return;
+
+        // 다른 스킬 버튼을 눌렀을 때, 기존 타겟팅 모드가 있다면 먼저 종료
+        if (GameManager.Instance.isTargetingSkill)
+        {
+            GameManager.Instance.ExitSkillTargetingMode();
+        }
 
         UnitInstance selectedUnit = GameManager.Instance.selectedUnit;
         SkillEffect skillToUse = isConditional ? selectedUnit.ConditionalSkill : selectedUnit.ActiveSkill;

@@ -3,7 +3,9 @@ using System; // 이벤트를 위해 추가
 using System.Collections.Generic; // Dictionary 사용을 위해 추가
 using System.Collections; // 코루틴 사용을 위해 추가
 using System.Linq;       // Linq 사용을 위해 추가
-using Map; // BattleEncounter 사용을 위해 추가
+using UnityEngine.SceneManagement; // 씬 관리를 위해 추가
+using Map;
+using UnityEngine.Tilemaps; // BattleEncounter 사용을 위해 추가
 
 public class GameManager : MonoBehaviour
 {
@@ -15,6 +17,9 @@ public class GameManager : MonoBehaviour
 
     // 현재 진행 중인 (또는 진행 예정인) 전투 데이터
     public BattleEncounter currentEncounter;
+    
+    // 현재 전투/이벤트의 보상 데이터
+    public RewardData currentReward;
 
     // 게임 단계 정의
     public enum GamePhase
@@ -99,10 +104,44 @@ public class GameManager : MonoBehaviour
         OnPhaseChanged += HandlePhaseChange;
     }
 
+    void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
     void OnDestroy()
     {
         // 오브젝트 파괴 시 이벤트 구독 해제
         OnPhaseChanged -= HandlePhaseChange;
+    }
+
+    // 씬이 로드될 때마다 호출됨
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == "Battle")
+        {
+            Debug.Log("Battle Scene Loaded. Initializing Battle...");
+            
+            // 씬 전환 후 참조 재설정
+            gameGrid = null; // 초기화
+            if (PlacementManager.Instance != null && PlacementManager.Instance.gameGrid != null)
+            {
+                gameGrid = PlacementManager.Instance.gameGrid;
+            }
+            else
+            {
+                GameObject gridObj = GameObject.Find("Grid");
+                if (gridObj != null) gameGrid = gridObj.GetComponent<Grid>();
+            }
+
+            // 전투 시작
+            StartGame();
+        }
     }
 
     // --- 유닛 레지스트리 관리 ---
@@ -187,12 +226,136 @@ public class GameManager : MonoBehaviour
         }
         return false;
     }
-    
-    void Start()
+
+    /// <summary>
+    /// 해당 플레이어를 보호하는 유닛(UnitCard)이 없어 직접 공격이 가능한지 확인합니다.
+    /// </summary>
+    /// <returns>보호하는 유닛이 없으면 true, 있으면 false</returns>
+    public bool IsDirectAttackAvailable(Player targetPlayer)
     {
-        // 게임 시작 (테스트를 위해 Start에서 바로 호출)
-        StartGame();
+        foreach (var unit in unitRegistry.Values)
+        {
+            // 대상 플레이어의 유닛 중 'UnitCard' 타입이면서 살아있는 유닛이 하나라도 있으면 직접 공격 불가
+            if (unit.owner == targetPlayer && unit.sourceCardData is UnitCard && unit.currentHealth > 0)
+            {
+                return false;
+            }
+        }
+        return true; 
     }
+
+    /// <summary>
+    /// Assault 유닛이 상대 플레이어를 직접 공격합니다.
+    /// </summary>
+    /// <param name="attacker">공격하는 유닛</param>
+    /// <param name="consumeEnergy">에너지를 소모할지 여부 (스킬 사용 시 true)</param>
+    public void ExecuteDirectAttack(UnitInstance attacker, bool consumeEnergy = false)
+    {
+        if (!(attacker.sourceCardData is UnitCard unitCard)) return;
+
+        // Assault 유닛인지 체크
+        if (unitCard.unitClass != Enums.UnitClass.Assault)
+        {
+            Debug.LogWarning("Assault 유닛만 플레이어를 직접 공격할 수 있습니다.");
+            return;
+        }
+
+        Player targetPlayer = (attacker.owner == Player.Player1) ? Player.Player2 : Player.Player1;
+
+        // 공격 가능 여부 재확인
+        if (!IsDirectAttackAvailable(targetPlayer))
+        {
+            Debug.LogWarning("상대 필드에 유닛이 존재하여 직접 공격할 수 없습니다.");
+            return;
+        }
+
+        // 에너지 소모 (스킬로 사용된 경우)
+        if (consumeEnergy && currentSkillToUse != null)
+        {
+            int cost = attacker.GetSkillCost(currentSkillToUse);
+            if (!SpendEnergy(cost)) return; // 에너지 부족 시 중단
+        }
+
+        // 데미지 계산: 성급(Rarity)에 따라 1, 2, 3 데미지
+        int damage = (int)unitCard.rarity;
+        
+        Debug.Log($"[Direct Attack] {attacker.sourceCardData.cardName}({unitCard.rarity})이(가) {targetPlayer}를 직접 공격! (데미지: {damage})");
+        
+        ReducePlayerHealth(targetPlayer, damage);
+        attacker.hasUsedSkillThisTurn = true;
+    }
+
+    /// <summary>
+    /// 스킬 타겟팅 모드에서 적 프로필(본체)을 클릭했을 때 호출됩니다.
+    /// </summary>
+    public void HandleEnemyProfileClickInTargetingMode()
+    {
+        if (!isTargetingSkill || skillCaster == null || currentSkillToUse == null) return;
+
+        // 1. 시전자가 Assault 유닛인지 확인
+        if (!(skillCaster.sourceCardData is UnitCard unitCard) || unitCard.unitClass != Enums.UnitClass.Assault)
+        {
+            Debug.Log("Assault 유닛만 본체를 직접 공격할 수 있습니다.");
+            return;
+        }
+
+        // 2. 스킬이 적을 대상으로 하는지 확인 (Enemy 타입이어야 함)
+        if (currentSkillToUse.targetType != SkillTargetType.Enemy)
+        {
+            Debug.Log("이 스킬은 적 본체를 대상으로 할 수 없습니다.");
+            return;
+        }
+
+        // 3. 직접 공격 실행 (에너지 소모 포함)
+        ExecuteDirectAttack(skillCaster, true);
+
+        // 4. 타겟팅 모드 종료
+        ExitSkillTargetingMode();
+    }
+
+    /// <summary>
+    /// UI(적 프로필 클릭 등)에서 호출하기 위한 직격 공격 시도 메서드
+    /// (타겟팅 모드가 아닐 때의 단순 공격 클릭 등)
+    /// </summary>
+    public void TryDirectAttack()
+    {
+        if (selectedUnit == null)
+        {
+            Debug.Log("직접 공격을 수행하려면 먼저 아군 유닛을 선택하세요.");
+            return;
+        }
+        
+        // 내 턴이 아니거나, 내 유닛이 아니거나, 이미 행동했다면 무시
+        if (currentPlayer != Player.Player1 || selectedUnit.owner != currentPlayer)
+        {
+            Debug.Log("자신의 유닛만 명령할 수 있습니다.");
+            return;
+        }
+
+        if (selectedUnit.hasUsedSkillThisTurn)
+        {
+            Debug.Log("이 유닛은 이미 행동을 마쳤습니다.");
+            return;
+        }
+
+        ExecuteDirectAttack(selectedUnit);
+    }
+    
+        void Start()
+    
+        {
+    
+            // 테스트용: 만약 에디터에서 Battle 씬을 직접 실행했을 경우를 대비
+    
+            if (SceneManager.GetActiveScene().name == "Battle")
+    
+            {
+    
+                StartGame();
+    
+            }
+    
+        }
 
     // 게임 시작
     public void StartGame()
@@ -294,11 +457,11 @@ public class GameManager : MonoBehaviour
             }
         }
         
-        if (enemyDeck.Count == 0 && AssaultCardData != null && currentEncounter.enemyDeck.Count == 0)
-        {
+        //if (enemyDeck.Count == 0 && AssaultCardData != null && currentEncounter.enemyDeck.Count == 0)
+        //{
              // 덱이 아예 없으면 테스트용으로 채움
-            for (int i = 0; i < 15; i++) enemyDeck.Add(AssaultCardData);
-        }
+            //for (int i = 0; i < 15; i++) enemyDeck.Add(AssaultCardData);
+        //}
 
         foreach (var spawnInfo in currentEncounter.enemies)
         {
@@ -592,6 +755,9 @@ public class GameManager : MonoBehaviour
 
         // 3. 유닛 오브젝트의 실제 월드 위치 변경
         unitToMove.transform.position = gameGrid.GetCellCenterWorld(destination);
+
+        unitToMove.isRevealed = false;
+        unitToMove.isIdentified = false; // 이동 시 위치가 발각됨
         
         // 4. [매의 눈] 상태 체크: 이동 시 위치가 발각됨
         if (unitToMove.isTracking)
@@ -696,16 +862,41 @@ public class GameManager : MonoBehaviour
         if (player1Health <= 0)
         {
             Debug.Log("===== Game Over! Player 2 Wins! =====");
-            // 여기에 실제 게임 종료 처리 로직 추가 (예: 씬 전환, 게임 오버 UI 표시, 게임 정지 등)
-            Time.timeScale = 0; // 예시: 게임 일시정지
-            // UIManager.Instance.ShowGameOverScreen("Player 2 Wins!"); // 예시: UIManager를 통해 게임 오버 화면 표시
+            EndBattle(false);
         }
         else if (player2Health <= 0)
         {
             Debug.Log("===== Game Over! Player 1 Wins! =====");
-            // 여기에 실제 게임 종료 처리 로직 추가
-            Time.timeScale = 0; // 예시: 게임 일시정지
-            // UIManager.Instance.ShowGameOverScreen("Player 1 Wins!"); // 예시: UIManager를 통해 게임 오버 화면 표시
+            EndBattle(true);
+        }
+    }
+
+    /// <summary>
+    /// 전투 종료 및 씬 전환 처리
+    /// </summary>
+    private void EndBattle(bool playerWon)
+    {
+        Time.timeScale = 1; // 시간이 멈춰있다면 다시 흐르게 설정
+
+        // CoreManager에 전투 결과 저장
+        if (CoreManager.Instance != null)
+        {
+            CoreManager.Instance.lastBattleResult = playerWon;
+            CoreManager.Instance.isReturningFromBattle = true;
+        }
+
+        if (currentEncounter != null)
+        {
+            // 캠페인 모드에서 왔다면 Campaign 씬으로 복귀
+            Debug.Log("Returning to Campaign Scene...");
+            // 승리/패배 정보를 어딘가(예: CampaignManager)에 저장해야 할 수도 있음
+            SceneManager.LoadScene("Campaign");
+        }
+        else
+        {
+            // 테스트 모드(메인메뉴)에서 왔다면 MainMenu 씬으로 복귀
+            Debug.Log("Returning to MainMenu Scene...");
+            SceneManager.LoadScene("MainMenu");
         }
     }
 
@@ -811,14 +1002,23 @@ public class GameManager : MonoBehaviour
             // 이동 처리 (직접 레지스트리 업데이트)
             DeregisterUnit(unitToMove.location);
             RegisterUnit(dest, unitToMove);
+
+            TileEffectManager.Instance.removePermanentlyHighlightedTile(unitToMove.location);
+
             unitToMove.location = dest;
             unitToMove.transform.position = gameGrid.GetCellCenterWorld(dest);
+
+
+
+            unitToMove.isRevealed = false;
+            unitToMove.isIdentified = false; // 이동 시 위치가 발각됨
             
             // [매의 눈] 상태 체크: 이동 시 위치가 발각됨
             if (unitToMove.isTracking)
             {
                 unitToMove.isRevealed = true;
                 Debug.Log($"[AI Tracking] {unitToMove.sourceCardData.cardName}이(가) 이동하여 위치가 노출되었습니다!");
+                TileEffectManager.Instance.HighlightReconTile(dest);
             }
 
             Debug.Log($"[AI] {unitToMove.sourceCardData.cardName} 이동 -> {dest}");
@@ -916,12 +1116,14 @@ public class GameManager : MonoBehaviour
             else
             {
                 // 공개된 적이 없다면? 
-                // 필드에 적 유닛이 아예 없다면 본체 직접 공격 (규칙)
-                bool anyEnemyExists = unitRegistry.Values.Any(u => u.owner == Player.Player1);
-                
-                if (!anyEnemyExists)
+                // 필드에 보호 유닛이 아예 없다면 본체 직접 공격 (Assault 유닛만 가능)
+                if (unit.sourceCardData is UnitCard uc && uc.unitClass == Enums.UnitClass.Assault)
                 {
-                    Debug.Log($"[AI] 적 유닛이 없어 직접 공격 기회! (구현 필요)");
+                    if (IsDirectAttackAvailable(Player.Player1))
+                    {
+                        Debug.Log($"[AI] 플레이어 보호 유닛이 없어 {uc.cardName} 직접 공격 시도!");
+                        ExecuteDirectAttack(unit);
+                    }
                 }
             }
         }

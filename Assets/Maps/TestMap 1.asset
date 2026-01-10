@@ -20,18 +20,26 @@ MonoBehaviour:
     nodeName: 
     tier: 0
     battleEncounter: {fileID: 0}
+    dialogueEvent: {fileID: 0}
+    nodeReward: {fileID: 0}
   - coordinate: {x: 1, y: 0, z: 0}
     type: 2
     nodeName: 
     tier: 0
     battleEncounter: {fileID: 0}
+    dialogueEvent: {fileID: 11400000, guid: 8963134f647b7184c9b24cd96c88f53b, type: 2}
+    nodeReward: {fileID: 0}
   - coordinate: {x: 0, y: 1, z: 0}
     type: 3
     nodeName: 
     tier: 0
     battleEncounter: {fileID: 0}
+    dialogueEvent: {fileID: 0}
+    nodeReward: {fileID: 0}
   - coordinate: {x: 2, y: 0, z: 0}
     type: 0
     nodeName: 
     tier: 0
     battleEncounter: {fileID: 11400000, guid: 8d6b8b5164d2baf448eabf8360ee17ff, type: 2}
+    dialogueEvent: {fileID: 0}
+    nodeReward: {fileID: 11400000, guid: 2d90866a99a1e1e478314ea42c0869d1, type: 2}

@@ -43,7 +43,31 @@ namespace Map
 
             if (mapData != null)
             {
+                // 전투에서 복귀했고 승리했다면, 해당 노드를 클리어 목록에 추가
+                if (CoreManager.Instance != null && CoreManager.Instance.isReturningFromBattle)
+                {
+                    if (CoreManager.Instance.lastBattleResult)
+                    {
+                        CoreManager.Instance.clearedNodes.Add(CoreManager.Instance.lastVisitedNodeCoordinate);
+                        Debug.Log($"전투 승리! 노드 {CoreManager.Instance.lastVisitedNodeCoordinate} 클리어 처리됨.");
+
+                        // 보상 UI 호출
+                        if (MapRewardManager.Instance != null)
+                        {
+                            MapRewardManager.Instance.CheckAndShowReward();
+                        }
+                    }
+                    else
+                    {
+                         Debug.Log("전투 패배... 노드 상태 유지.");
+                         // 패배 시 보상 없음
+                         CoreManager.Instance.pendingReward = null; 
+                    }
+                    CoreManager.Instance.isReturningFromBattle = false; // 처리 완료
+                }
+
                 GenerateMap();
+
             }
         }
 
@@ -78,7 +102,18 @@ namespace Map
             }
 
             // 플레이어 초기화
-            SpawnPlayerToken(mapData.startPosition);
+            if (playerToken == null) // 플레이어가 아직 없을 때만 생성
+            {
+                Vector3Int spawnPos = mapData.startPosition;
+                
+                // 저장된 위치가 있다면 그곳을 사용
+                if (CoreManager.Instance != null && CoreManager.Instance.lastVisitedNodeCoordinate != Vector3Int.zero)
+                {
+                    spawnPos = CoreManager.Instance.lastVisitedNodeCoordinate;
+                }
+                
+                SpawnPlayerToken(spawnPos);
+            }
         }
 
         /// <summary>
@@ -219,6 +254,16 @@ namespace Map
         {
             Debug.Log($"도착: {nodeData.type} 노드");
 
+            // 이미 클리어한 노드인지 확인 (Battle, Boss, Event만 해당)
+            if (CoreManager.Instance != null && CoreManager.Instance.clearedNodes.Contains(nodeData.coordinate))
+            {
+                if (nodeData.type == NodeType.Battle || nodeData.type == NodeType.Boss || nodeData.type == NodeType.Event)
+                {
+                    Debug.Log("이미 클리어한 노드이므로 이벤트를 실행하지 않습니다.");
+                    return; 
+                }
+            }
+
             if (nodeData.type == NodeType.Battle || nodeData.type == NodeType.Boss)
             {
                 if (nodeData.battleEncounter != null)
@@ -228,17 +273,19 @@ namespace Map
                     if (GameManager.Instance != null)
                     {
                         GameManager.Instance.currentEncounter = nodeData.battleEncounter;
-                    }
-                    else
-                    {
-                        Debug.LogError("GameManager가 씬에 없습니다! 전투 데이터를 전달할 수 없습니다.");
-                        return; // GameManager가 없으면 씬 전환 중단
+                        GameManager.Instance.currentReward = nodeData.nodeReward; // (삭제 예정 - CoreManager 사용 시)
                     }
                     
-                    // TODO: 현재 맵 상태 저장 (어떤 노드에 있었는지 등)
-                    // SaveCampaignState();
+                    // CoreManager에 현재 노드 좌표 및 보상 정보 저장
+                    if (CoreManager.Instance != null)
+                    {
+                        CoreManager.Instance.lastVisitedNodeCoordinate = nodeData.coordinate;
+                        CoreManager.Instance.isReturningFromBattle = false; 
+                        CoreManager.Instance.pendingReward = nodeData.nodeReward; // 보상 등록
+                        CoreManager.Instance.SaveGameData(); 
+                    }
 
-                    SceneManager.LoadScene("Battle"); // 실제 씬 전환 활성화
+                    SceneManager.LoadScene("Battle"); 
                 }
                 else
                 {
@@ -248,10 +295,44 @@ namespace Map
             else if (nodeData.type == NodeType.Shop)
             {
                 // Shop 씬 또는 UI 오픈
+                // 상점은 클리어 처리하지 않음 (반복 이용 가능)
+            }
+            else if (nodeData.type == NodeType.Event)
+            {
+                if (nodeData.dialogueEvent != null)
+                {
+                    Debug.Log($"대화 이벤트 시작: {nodeData.dialogueEvent.eventTitle}");
+                    if (DialogueManager.Instance != null)
+                    {
+                        DialogueManager.Instance.StartDialogue(nodeData.dialogueEvent, () => 
+                        {
+                            Debug.Log("대화 이벤트가 종료되었습니다.");
+                            
+                            // 대화 성공적으로 종료 시 클리어 처리 및 저장
+                            if (CoreManager.Instance != null)
+                            {
+                                CoreManager.Instance.clearedNodes.Add(nodeData.coordinate);
+                                CoreManager.Instance.SaveGameData();
+                                Debug.Log($"이벤트 노드 {nodeData.coordinate} 클리어 처리됨.");
+                                
+                                // (선택) 맵 갱신이 필요하다면 GenerateMap() 호출
+                                // GenerateMap(); 
+                            }
+                        });
+                    }
+                    else
+                    {
+                        Debug.LogError("DialogueManager가 씬에 없습니다!");
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("Event 노드이지만 연결된 DialogueEventData가 없습니다.");
+                }
             }
             else if (nodeData.type == NodeType.Empty)
             {
-                // 아무 일도 일어나지 않음
+                // 아무 일도 일어나지 않음 (클리어 처리 안 함)
                 Debug.Log("빈 노드(또는 시작 지점)에 도착했습니다.");
             }
         }

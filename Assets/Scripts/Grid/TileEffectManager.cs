@@ -37,6 +37,19 @@ public class TileEffectManager : MonoBehaviour
     /// 지정된 위치에 정찰 하이라이트 타일을 표시하고 영구 목록에 추가합니다.
     /// 아군 유닛의 위치인 경우 영구 마킹을 생략합니다.
     /// </summary>
+    
+    public void removePermanentlyHighlightedTile(Vector3Int targetCell)
+    {
+        if (permanentlyHighlightedTiles.Contains(targetCell))
+        {
+            permanentlyHighlightedTiles.Remove(targetCell);
+            if (effectTilemap.GetTile(targetCell) == reconHighlightTile)
+            {
+                effectTilemap.SetTile(targetCell, null);
+            }
+        }
+    }
+
     public void HighlightReconTile(Vector3Int targetCell)
     {
         if (reconHighlightTile == null)
@@ -98,13 +111,23 @@ public class TileEffectManager : MonoBehaviour
 
     private System.Collections.IEnumerator FlashRoutine(Vector3Int cell, float duration)
     {
-        // Flash 시작: 보호 목록에 추가
+        // 아군 또는 적군 타일맵 범위 밖의 칸은 무시
+        if (PlacementManager.Instance != null)
+        {
+            bool isAllyTile = PlacementManager.Instance.allyTilemap.HasTile(cell);
+            bool isEnemyTile = PlacementManager.Instance.enemyTilemap.HasTile(cell);
+
+            if (!isAllyTile && !isEnemyTile)
+            {
+                yield break; // 유효한 타일이 아니면 루틴 즉시 종료
+            }
+        }
+
         flashingTiles.Add(cell);
 
         // Flash는 영구 목록에 추가하지 않고 타일만 설정
         if (reconHighlightTile != null)
         {
-            // Debug.Log($"FlashRoutine: {cell}");
             effectTilemap.SetTile(cell, reconHighlightTile);
         }
 

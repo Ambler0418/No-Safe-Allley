@@ -49,7 +49,9 @@ public class AddStatusEffect : ActionEffect
         }
         else
         {
-            Debug.LogWarning($"[AddStatusEffect] 대상이 유효하지 않습니다. (Tile: {targetTile}, Self: {applyToSelf})");
+            // 대상이 없는 것은 에러가 아닐 수 있음 (특히 광역 스킬이나 빈 땅에 쏜 경우)
+            // 따라서 Warning 대신 일반 Log로 변경하여 불필요한 콘솔 경고를 줄임
+            // Debug.Log($"[AddStatusEffect] 대상 유닛이 없습니다. 효과를 적용하지 않습니다. (Tile: {targetTile})");
             return false;
         }
     }

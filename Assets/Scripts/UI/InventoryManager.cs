@@ -137,6 +137,7 @@ public class InventoryManager : MonoBehaviour
         if (CoreManager.Instance != null)
         {
             CoreManager.Instance.currentDeck = new List<CardData>(currentEditingDeck);
+            CoreManager.Instance.SaveGameData(); // 파일에 즉시 저장
             Debug.Log("Deck saved successfully!");
         }
     }

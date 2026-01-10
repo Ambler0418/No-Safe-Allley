@@ -36,6 +36,12 @@ namespace Map
         
         [Tooltip("이 노드가 Battle/Boss 타입일 경우 사용될 전투 데이터")]
         public BattleEncounter battleEncounter;
+
+        [Tooltip("이 노드가 Event 타입일 경우 사용될 대화 이벤트 데이터")]
+        public DialogueEventData dialogueEvent;
+
+        [Tooltip("이 노드 완료 시 지급될 보상 데이터")]
+        public RewardData nodeReward;
     }
 
     /// <summary>

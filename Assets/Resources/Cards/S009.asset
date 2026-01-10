@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9abd473f958f98143a60cfa6ad73d0d2, type: 3}
+  m_Name: S009
+  m_EditorClassIdentifier: 
+  cardName: "\uC778\uD574\uC804\uC220"
+  cardType: 1
+  faction: 1
+  description: 
+  artwork: {fileID: -4381364712226491158, guid: 7ccbb4022dcfc78439ee6605e32b372b, type: 3}
+  energyCost: 0
+  tacticSkill: {fileID: 11400000, guid: f9f87e9727cb4ed478b9e4a43e90917b, type: 2}

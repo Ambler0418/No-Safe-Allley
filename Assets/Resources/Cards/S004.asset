@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 015edef490fbcb342a3d1b4d88ddbacd, type: 3}
+  m_Name: S004
+  m_EditorClassIdentifier: Assembly-CSharp::UnitCard
+  cardName: "\uC8FC\uC778\uACF5"
+  cardType: 0
+  faction: 1
+  description: 
+  artwork: {fileID: 5807239822552250474, guid: 8d3b9e125917808458b25abe1fffc723, type: 3}
+  unitSprite: {fileID: 8102842150688411597, guid: fbd9924c850a71b4fa5772f6fa6bb936, type: 3}
+  rarity: 3
+  unitClass: 2
+  maxHealth: 1100
+  attack: 380
+  defense: 400
+  activeSkill: {fileID: 11400000, guid: e9ab00f1092b4fc46b720986e1e4bd0e, type: 2}
+  conditionalSkill: {fileID: 11400000, guid: 8f96016c8b6f1d34f9646ed3739df3fe, type: 2}
+  conditionalSkillCondition: EnemyCount_LE_2

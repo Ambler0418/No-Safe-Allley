@@ -1,0 +1,117 @@
+{
+    "gold": 115,
+    "playerCurrentHealth": 22,
+    "collectedCards": [
+        {
+            "cardName": "잠입자",
+            "quantity": 1
+        },
+        {
+            "cardName": "추적자",
+            "quantity": 1
+        },
+        {
+            "cardName": "연금술사",
+            "quantity": 1
+        },
+        {
+            "cardName": "주인공",
+            "quantity": 1
+        },
+        {
+            "cardName": "은신처",
+            "quantity": 1
+        },
+        {
+            "cardName": "블랙 마켓",
+            "quantity": 1
+        },
+        {
+            "cardName": "인공호흡기",
+            "quantity": 1
+        },
+        {
+            "cardName": "기습 거래",
+            "quantity": 1
+        },
+        {
+            "cardName": "인해전술",
+            "quantity": 1
+        },
+        {
+            "cardName": "치안군 보병",
+            "quantity": 1
+        },
+        {
+            "cardName": "정부 정찰병",
+            "quantity": 1
+        },
+        {
+            "cardName": "전술 장교",
+            "quantity": 1
+        },
+        {
+            "cardName": "계엄군 중대",
+            "quantity": 1
+        },
+        {
+            "cardName": "행정 청사",
+            "quantity": 1
+        },
+        {
+            "cardName": "전초 기지",
+            "quantity": 1
+        },
+        {
+            "cardName": "강제 징발",
+            "quantity": 1
+        },
+        {
+            "cardName": "계엄령 선포",
+            "quantity": 1
+        },
+        {
+            "cardName": "성전사",
+            "quantity": 1
+        },
+        {
+            "cardName": "등불 성소",
+            "quantity": 1
+        },
+        {
+            "cardName": "의식 제단",
+            "quantity": 1
+        },
+        {
+            "cardName": "축도의 연쇄",
+            "quantity": 1
+        },
+        {
+            "cardName": "불 꺼뜨리기",
+            "quantity": 1
+        },
+        {
+            "cardName": "최후의 점화",
+            "quantity": 1
+        }
+    ],
+    "currentDeckCardNames": [],
+    "currentMapName": "",
+    "playerMapPosition": {
+        "x": 2,
+        "y": 0,
+        "z": 0
+    },
+    "clearedNodeCoordinates": [
+        {
+            "x": 1,
+            "y": 0,
+            "z": 0
+        },
+        {
+            "x": 2,
+            "y": 0,
+            "z": 0
+        }
+    ]
+}
