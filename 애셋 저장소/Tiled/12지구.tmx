@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.2" orientation="hexagonal" renderorder="right-down" width="30" height="20" tilewidth="120" tileheight="140" infinite="0" hexsidelength="70" staggeraxis="y" staggerindex="odd" nextlayerid="3" nextobjectid="33">
+ <tileset firstgid="1" name="HexTerrain" tilewidth="120" tileheight="140" tilecount="1" columns="1">
+  <image source="../PNG/Tiles/Sci-fi/scifi_base.png" width="120" height="140"/>
+ </tileset>
+ <tileset firstgid="2" source="HexTerrain.tsx"/>
+ <tileset firstgid="3" source="NoSafeAlleyTest.tsx"/>
+ <layer id="1" name="Tile Layer 1" width="30" height="20">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,3,3,3,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,3,3,0,0,3,3,3,3,3,3,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,3,3,3,0,0,3,3,3,3,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,0,3,3,3,3,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,0,3,3,3,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,3,3,3,3,3,3,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,3,3,3,3,3,3,3,3,3,3,3,0,3,3,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,3,3,3,3,3,3,3,3,3,0,3,3,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,4,3,3,3,3,3,3,3,0,0,3,3,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,3,0,3,3,3,3,3,3,3,0,0,0,3,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,3,0,3,3,3,3,3,0,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,3,0,0,0,0,3,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <objectgroup id="2" name="Object Layer 1">
+  <object id="2" gid="4" x="780.606" y="1504.97" width="120" height="140">
+   <properties>
+    <property name="Description" value="케이와 설이가 수송 트럭에서 대화를 나누다가 주인공과 만나서 인사를 나누고, 11지구 경계에 습격한 철골 무리를 소탕하기 위한 전투를 시작한다."/>
+    <property name="EventCode" value="12-001"/>
+    <property name="NodeType" value="Dialogue"/>
+   </properties>
+  </object>
+  <object id="3" gid="8" x="1382.42" y="457.879" width="120" height="140">
+   <properties>
+    <property name="GateTo" value="13"/>
+   </properties>
+  </object>
+  <object id="4" gid="8" x="2579.39" y="454.848" width="120" height="140">
+   <properties>
+    <property name="GateTo" value="11"/>
+   </properties>
+  </object>
+  <object id="5" gid="10" x="720.788" y="1610.06" width="120" height="140">
+   <properties>
+    <property name="Description" value="12지구 스폰포인트"/>
+    <property name="HomeID" value="12"/>
+    <property name="NodeType" value="Home"/>
+   </properties>
+  </object>
+  <object id="6" gid="5" x="840" y="1400.3" width="120" height="140">
+   <properties>
+    <property name="Description" value="플레이어가 처음 해보는 전투. 기본적인것을 알려주는 튜토리얼을 만들자."/>
+    <property name="EventCode" value="12-101"/>
+    <property name="NodeType" value="Battle"/>
+   </properties>
+  </object>
+  <object id="7" gid="7" x="661.212" y="1085.15" width="120" height="140">
+   <properties>
+    <property name="EventCode" value="12-201"/>
+    <property name="NodeType" value="Shop"/>
+   </properties>
+  </object>
+  <object id="8" gid="4" x="779.394" y="1088.18" width="120" height="140">
+   <properties>
+    <property name="Description" value="유랑상점 주인 환과 만난다."/>
+    <property name="EventCode" value="12-003"/>
+    <property name="NodeType" value="Dialogue"/>
+   </properties>
+  </object>
+  <object id="9" gid="4" x="900.636" y="1295.24" width="120" height="140">
+   <properties>
+    <property name="Description" value="케이와 첫 전투를 무사히 마친 후, 주인공은 주변을 조금 둘러보기로 결심한다."/>
+    <property name="EventCode" value="12-002"/>
+   </properties>
+  </object>
+  <object id="10" gid="4" x="1918.79" y="982.121" width="120" height="140">
+   <properties>
+    <property name="Description" value="사서를 만난다."/>
+    <property name="EventCode" value="12-010"/>
+   </properties>
+  </object>
+  <object id="11" gid="4" x="1379.39" y="1715.45" width="120" height="140">
+   <properties>
+    <property name="Description" value="길가에 피어있는 꽃 한송이를 찾은 주인공."/>
+    <property name="EventCode" value="12-005"/>
+   </properties>
+  </object>
+  <object id="13" gid="5" x="1861.21" y="1506.36" width="120" height="140">
+   <properties>
+    <property name="EventCode" value="12-103"/>
+   </properties>
+  </object>
+  <object id="14" gid="9" x="1918.79" y="1612.42" width="120" height="140">
+   <properties>
+    <property name="Description" value="항생제와 카드를 획득한다."/>
+    <property name="EventCode" value="12-302"/>
+   </properties>
+  </object>
+  <object id="15" gid="4" x="1261.21" y="1294.24" width="120" height="140">
+   <properties>
+    <property name="Description" value="산책을 나온 단원들의 뽁뽁이타임을 마주친다."/>
+    <property name="EventCode" value="12-004"/>
+   </properties>
+  </object>
+  <object id="16" gid="4" x="1440" y="1400.3" width="120" height="140">
+   <properties>
+    <property name="Decription" value="주인공은 12지구에서 가장 높은 건물 폐허를 올라가본다."/>
+    <property name="EventCode" value="12-006"/>
+   </properties>
+  </object>
+  <object id="17" gid="4" x="1679.39" y="1191.21" width="120" height="140">
+   <properties>
+    <property name="Description" value="코코를 발견해 이야기를 나눈다."/>
+    <property name="EventCode" value="12-008"/>
+   </properties>
+  </object>
+  <object id="18" gid="9" x="1558.18" y="560.909" width="120" height="140">
+   <properties>
+    <property name="Description" value="축구공 1개를 획득한다."/>
+    <property name="EventCode" value="12-301"/>
+   </properties>
+  </object>
+  <object id="19" gid="5" x="2221.82" y="1294.24" width="120" height="140">
+   <properties>
+    <property name="EventCode" value="12-104"/>
+   </properties>
+  </object>
+  <object id="20" gid="9" x="2282.42" y="1400.3" width="120" height="140">
+   <properties>
+    <property name="Description" value="옐로우 포인트와 카드를 획득한다."/>
+    <property name="EventCode" value="12-303"/>
+   </properties>
+  </object>
+  <object id="23" gid="4" x="1979.39" y="876.061" width="120" height="140">
+   <properties>
+    <property name="Description" value="아틀라스에 대해"/>
+    <property name="EventCode" value="12-011"/>
+   </properties>
+  </object>
+  <object id="24" gid="11" x="2040" y="560.909" width="120" height="140">
+   <properties>
+    <property name="Description" value="아이들이 놀거리를 찾고있다."/>
+    <property name="EventCode" value="12-401"/>
+   </properties>
+  </object>
+  <object id="26" gid="4" x="1436.97" y="982.121" width="120" height="140">
+   <properties>
+    <property name="Description" value="주인공이 정부 인원과의 미팅 날짜를 기억하지 못한다."/>
+    <property name="EventCode" value="12-007"/>
+   </properties>
+  </object>
+  <object id="28" gid="5" x="1140" y="1085.15" width="120" height="140">
+   <properties>
+    <property name="Description" value="Battle 맛 좀 봐라"/>
+    <property name="EventCode" value="12-102"/>
+   </properties>
+  </object>
+  <object id="29" gid="4" x="1561.21" y="772.424" width="120" height="140">
+   <properties>
+    <property name="Description" value="이설을 발견해 이야기를 나눈다."/>
+    <property name="EventCode" value="12-009"/>
+   </properties>
+  </object>
+  <object id="30" gid="4" x="2282.42" y="772.424" width="120" height="140">
+   <properties>
+    <property name="Description" value="등불 교단에 대해"/>
+    <property name="EventCode" value="12-012"/>
+   </properties>
+  </object>
+  <object id="32" gid="11" x="1021.82" y="1505.76" width="120" height="140">
+   <properties>
+    <property name="Description" value="메딕 블루가 약품을 찾고 있다."/>
+    <property name="EventCode" value="12-402"/>
+   </properties>
+  </object>
+ </objectgroup>
+</map>

@@ -11,6 +11,10 @@ public class PlacementManager : MonoBehaviour
 
     public static PlacementManager Instance;
 
+    // --- Preview (Ghost Unit) ---
+    private GameObject previewObject;
+    private SpriteRenderer previewRenderer;
+
     void Awake()
     {
         if (Instance == null)
@@ -20,6 +24,105 @@ public class PlacementManager : MonoBehaviour
         else
         {
             Destroy(gameObject);
+        }
+    }
+
+    void Update()
+    {
+        // 미리보기 유닛이 활성화되어 있다면 반짝거리는 효과 적용
+        if (previewObject != null && previewObject.activeSelf)
+        {
+            float alpha = Mathf.PingPong(Time.time * 2f, 0.5f) + 0.5f; // 0.5 ~ 1.0 사이 반복 (더 진하게)
+            Color color = previewRenderer.color;
+            color.a = alpha;
+            previewRenderer.color = color;
+        }
+    }
+
+    /// <summary>
+    /// 드래그 중인 카드의 배치 예상 위치를 미리 보여줍니다.
+    /// 배치 가능한 위치라면 Unit Sprite를 표시하고 true를 반환합니다.
+    /// </summary>
+    public bool UpdatePlacementPreview(CardData card, Vector3 worldPosition)
+    {
+        // 유닛이나 거점 카드가 아니면 미리보기 불필요 (클래스 타입으로도 체크)
+        bool isPlaceable = (card is UnitCard) || (card is BaseCard) || 
+                           (card.cardType == Enums.CardType.Unit) || (card.cardType == Enums.CardType.Base);
+
+        if (!isPlaceable)
+        {
+            HidePreview();
+            return false;
+        }
+
+        // 배치 단계 확인 (TryPlaceCard와 동일한 로직)
+        var gm = GameManager.Instance;
+        if (gm.currentPhase != GameManager.GamePhase.Preparation && gm.currentPhase != GameManager.GamePhase.Placement)
+        {
+            HidePreview();
+            return false;
+        }
+        if (gm.currentPhase == GameManager.GamePhase.Placement && gm.placementActionsTaken >= gm.placementActionsPerTurn)
+        {
+            HidePreview();
+            return false;
+        }
+
+        Vector3Int cellLocation = gameGrid.WorldToCell(worldPosition);
+        cellLocation.z = 0;
+
+        // 배치 유효성 검사
+        bool isValid = IsPlacementValid(cellLocation);
+
+        if (isValid)
+        {
+            // 미리보기 오브젝트가 없으면 생성
+            if (previewObject == null)
+            {
+                previewObject = new GameObject("UnitPreviewGhost");
+                previewRenderer = previewObject.AddComponent<SpriteRenderer>();
+                
+                // [중요] 초기화 확실하게
+                previewObject.transform.localScale = Vector3.one; 
+                
+                // 실루엣 효과를 위해 기본 색상을 검은색으로 설정
+                previewRenderer.color = Color.black;
+                
+                // Sorting 설정: 레이어를 Characters로, 오더를 높게 설정
+                previewRenderer.sortingLayerName = "Characters";
+                previewRenderer.sortingOrder = 100; 
+            }
+
+            // 위치 설정 (Z축을 -1로 당겨서 가려짐 방지)
+            Vector3 targetPos = gameGrid.GetCellCenterWorld(cellLocation);
+            targetPos.z = -1f; 
+            previewObject.transform.position = targetPos;
+            
+            Sprite spriteToUse = null;
+            if (card is UnitCard uc) spriteToUse = uc.unitSprite;
+            else if (card is BaseCard bc) spriteToUse = bc.unitSprite;
+
+            if (spriteToUse != null)
+            {
+                previewRenderer.sprite = spriteToUse;
+                if (!previewObject.activeSelf) previewObject.SetActive(true);
+                return true; // 미리보기 표시 중
+            }
+            else
+            {
+                Debug.LogWarning($"[Preview] {card.cardName}의 Unit Sprite가 없습니다!");
+            }
+        }
+
+        HidePreview();
+        return false;
+    }
+
+    public void HidePreview()
+    {
+        if (previewObject != null)
+        {
+            previewObject.SetActive(false);
         }
     }
 
@@ -129,14 +232,14 @@ public bool TryPlaceCard(CardData card, Vector3 worldPosition)
         // 1. 타일맵 영역 확인: 아군 영역 타일 위에 드롭되었는지 확인
         if (!allyTilemap.HasTile(cell))
         {
-            Debug.Log("배치 실패: 아군 타일 위에 놓아야 합니다.");
+            // Debug.Log("배치 실패: 아군 타일 위에 놓아야 합니다.");
             return false;
         }
 
         // 2. 이미 유닛/거점이 있는지 확인
         if (GameManager.Instance.GetUnitAt(cell) != null)
         {
-            Debug.Log($"배치 실패: 해당 위치({cell})에 이미 유닛이나 거점이 있습니다.");
+            // Debug.Log($"배치 실패: 해당 위치({cell})에 이미 유닛이나 거점이 있습니다.");
             return false;
         }
 

@@ -1,0 +1,58 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "12지구.tmx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "#HexTerrain": {
+            "dynamicWrapping": false
+        },
+        "12지구.tmx": {
+            "scale": 0.33,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 1765.151515151515,
+                "y": 966.6666666666666
+            }
+        },
+        "12지구.tmx#HexTerrain": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1
+        },
+        "HexTerrain.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "NoSafeAlleyTest.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        }
+    },
+    "last.imagePath": "C:/UnityWorkspace/No Safe Alley/애셋 저장소/PNG/Tiles/Mill",
+    "map.lastUsedFormat": "tmx",
+    "map.orientation": "4",
+    "map.tileHeight": 128,
+    "map.tileWidth": 128,
+    "openFiles": [
+        "12지구.tmx",
+        "NoSafeAlleyTest.tsx"
+    ],
+    "project": "No Safe Alley.tiled-project",
+    "recentFiles": [
+        "NoSafeAlleyTest.tsx",
+        "12지구.tmx",
+        "HexTerrain.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 140,
+        "width": 120
+    },
+    "tileset.type": 1
+}

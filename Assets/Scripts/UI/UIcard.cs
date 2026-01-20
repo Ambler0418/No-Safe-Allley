@@ -59,12 +59,35 @@ public class UICard : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
     {
         rectTransform.position = eventData.position;
         rectTransform.localRotation = Quaternion.identity; // 드래그 중에는 각도를 0으로 설정
+
+        // --- 배치 미리보기 (Ghost Unit) 로직 ---
+        if (PlacementManager.Instance != null)
+        {
+            // [중요] 2D에서 ScreenToWorldPoint 사용 시 z값을 카메라와의 거리로 설정해야 함
+            Vector3 screenPos = Input.mousePosition;
+            screenPos.z = -Camera.main.transform.position.z; // 카메라가 -10에 있다면 10으로 설정
+            Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(screenPos);
+            
+            // Debug.Log($"[Drag Debug] MouseWorld: {mouseWorldPosition}");
+
+            bool isPreviewShowing = PlacementManager.Instance.UpdatePlacementPreview(cardData, mouseWorldPosition);
+            
+            // 미리보기가 보이면 카드 UI는 숨김 (투명하게), 아니면 보임
+            canvasGroup.alpha = isPreviewShowing ? 0f : 1f;
+        }
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
         HandManager.Instance.OnCardDragEnd(this); // 핸드 매니저에게 드래그 종료를 알림
         canvasGroup.blocksRaycasts = true;
+        canvasGroup.alpha = 1f; // 드래그 종료 시 투명도 복구
+
+        // 미리보기 종료
+        if (PlacementManager.Instance != null)
+        {
+            PlacementManager.Instance.HidePreview();
+        }
 
         Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         

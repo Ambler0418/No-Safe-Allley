@@ -16,10 +16,16 @@ public class TileEffectManager : MonoBehaviour
     public Tile assaultHighlightTile; // 정찰 효과에 사용할 붉은색 타일 애셋
     public Tile moveHighlightTile;  // 이동 가능 범위 표시에 사용할 타일 애셋
 
+    [Header("Effect Prefabs")]
+    [SerializeField] private GameObject selectionHighlightPrefab; // 선택 하이라이트 효과 프리팹
+
     // 영구적으로 하이라이트된 타일들을 추적하기 위한 HashSet
     private HashSet<Vector3Int> permanentlyHighlightedTiles = new HashSet<Vector3Int>();
     // Flash 효과가 진행 중인 타일들을 추적하기 위한 HashSet
     private HashSet<Vector3Int> flashingTiles = new HashSet<Vector3Int>();
+
+    private Grid grid; // 타일 좌표를 월드 좌표로 변환하기 위한 참조
+    private GameObject currentSelectionHighlight; // 현재 활성화된 선택 하이라이트 오브젝트
 
     void Awake()
     {
@@ -30,6 +36,42 @@ public class TileEffectManager : MonoBehaviour
         else
         {
             Instance = this;
+        }
+        grid = FindObjectOfType<Grid>(); // 씬에서 Grid 오브젝트를 찾아 참조
+    }
+
+    /// <summary>
+    /// 지정된 타일 위치에 선택 하이라이트 효과를 표시합니다.
+    /// </summary>
+    public void ShowSelectionHighlight(Vector3Int cell)
+    {
+        // 다른 하이라이트가 있다면 먼저 숨김
+        HideSelectionHighlight();
+
+        if (selectionHighlightPrefab != null && grid != null)
+        {
+            // 타일 셀의 중앙 월드 좌표를 계산
+            Vector3 worldPos = grid.GetCellCenterWorld(cell);
+
+            // 프리팹을 인스턴스화하고 위치 설정
+            currentSelectionHighlight = Instantiate(selectionHighlightPrefab, worldPos, Quaternion.identity);
+        }
+        else
+        {
+            if(selectionHighlightPrefab == null) Debug.LogWarning("Selection Highlight Prefab이 할당되지 않았습니다!");
+            if(grid == null) Debug.LogWarning("Grid를 찾을 수 없습니다!");
+        }
+    }
+
+    /// <summary>
+    /// 현재 표시되고 있는 선택 하이라이트 효과를 숨깁니다.
+    /// </summary>
+    public void HideSelectionHighlight()
+    {
+        if (currentSelectionHighlight != null)
+        {
+            Destroy(currentSelectionHighlight);
+            currentSelectionHighlight = null;
         }
     }
 

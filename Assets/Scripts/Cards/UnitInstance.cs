@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Collections; // IEnumerator를 위해 추가
 
 public class UnitInstance : MonoBehaviour
 {
@@ -20,6 +21,20 @@ public class UnitInstance : MonoBehaviour
     public List<StatusEffect> activeStatuses = new List<StatusEffect>();
 
     private Canvas HealthBarCanvas;
+
+    // --- 피격 효과 설정 ---
+    [Header("Damage Feedback Settings")]
+    [SerializeField] private GameObject _damageNumberPrefab; // 데미지 숫자 프리팹
+    [SerializeField] private Vector3 _damageNumberSpawnOffset = new Vector3(0, 0.5f, 0); // 데미지 숫자 생성 위치 오프셋
+    [SerializeField] private float _damageFeedbackDuration = 0.2f; // 피격 효과 지속 시간
+    [SerializeField] private float _shakeMagnitude = 0.1f;         // 흔들림 강도
+    [SerializeField] private float _shakeSpeed = 50f;              // 흔들림 속도
+
+    [Header("Selection Feedback")]
+    [SerializeField] private float _selectionScaleMultiplier = 1.2f; // 선택 시 커지는 배율
+
+    private Vector3 _originalScale; // 원래 크기
+    private Color _originalColor; // SpriteRenderer의 원래 색상
     public int maxHealth
     {
         get
@@ -293,7 +308,24 @@ public class UnitInstance : MonoBehaviour
         {
             Debug.LogError(this.gameObject.name + "에서 HealthBar 컴포넌트를 찾을 수 없습니다! 프리팹 설정을 확인하세요.");
         }
+        if (spriteRenderer != null)
+        {
+            _originalColor = spriteRenderer.color; // 초기 색상 저장
+        }
+        _originalScale = transform.localScale; // 초기 크기 저장
     }
+
+    // --- 선택 효과 ---
+    public void OnSelected()
+    {
+        transform.localScale = _originalScale * _selectionScaleMultiplier;
+    }
+
+    public void OnDeselected()
+    {
+        transform.localScale = _originalScale;
+    }
+
 
     // UnitCard와 BaseCard 모두를 초기화하기 위해 CardData를 매개변수로 받습니다.
     public void Initialize(CardData data, GameManager.Player owner)
@@ -431,6 +463,60 @@ public class UnitInstance : MonoBehaviour
                 }
             }
         }
+
+        // --- 피격 효과 재생 ---
+        if (spriteRenderer != null) // SpriteRenderer가 있는 유닛만 효과 재생
+        {
+            StartCoroutine(ShowDamageFeedback());
+        }
+
+        // --- 데미지 숫자 표시 ---
+        if (_damageNumberPrefab != null)
+        {
+            if (HealthBarCanvas != null)
+            {
+                Vector3 spawnPosition = transform.position + _damageNumberSpawnOffset;
+                GameObject numberGO = Instantiate(_damageNumberPrefab, spawnPosition, Quaternion.identity, HealthBarCanvas.transform);
+                DamageNumber dn = numberGO.GetComponent<DamageNumber>();
+                if(dn != null)
+                {
+                    dn.SetText(damage);
+                }
+            }
+            else
+            {
+                Debug.LogWarning("HealthBarCanvas가 없어 데미지 숫자를 표시할 수 없습니다.");
+            }
+        }
+    }
+
+    private IEnumerator ShowDamageFeedback()
+    {
+        if (spriteRenderer == null) yield break;
+
+        // 원래 색상 저장
+        _originalColor = spriteRenderer.color;
+
+        // 빨간색으로 변경
+        spriteRenderer.color = Color.red; // 또는 new Color(0.8f, 0.2f, 0.2f, 1f) 등 다크 테마에 어울리는 색상
+
+        // 흔들림 효과
+        Vector3 originalPosition = transform.localPosition;
+        float timer = 0f;
+
+        while (timer < _damageFeedbackDuration)
+        {
+            // 좌우로 흔들림
+            float xOffset = Mathf.Sin(timer * _shakeSpeed) * _shakeMagnitude;
+            transform.localPosition = originalPosition + new Vector3(xOffset, 0f, 0f);
+
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        // 원래 위치와 색상으로 복구
+        transform.localPosition = originalPosition;
+        spriteRenderer.color = _originalColor;
     }
 
     // --- 상태 이상 관리 메서드 ---

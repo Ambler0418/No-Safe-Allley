@@ -643,8 +643,8 @@ public class GameManager : MonoBehaviour
         }
 
         selectedUnit = unit;
+        selectedUnit.OnSelected(); // 선택되었음을 알림
         Debug.Log($"유닛 선택: {selectedUnit.sourceCardData.cardName}");
-        // 참고: 여기서 UIManager에게 이벤트를 보내 UI를 업데이트 하도록 할 수 있음
     }
 
     public void DeselectUnit()
@@ -652,6 +652,7 @@ public class GameManager : MonoBehaviour
         if (selectedUnit != null)
         {
             Debug.Log("유닛 선택 해제");
+            selectedUnit.OnDeselected(); // 선택 해제되었음을 알림
             selectedUnit = null;
         }
     }
@@ -987,7 +988,7 @@ public class GameManager : MonoBehaviour
     {
         // 이동 가능한 유닛 찾기 (공개된 유닛만 이동 가능)
         List<UnitInstance> movableUnits = unitRegistry.Values
-            .Where(u => u.owner == Player.Player2 && u.isIdentified) 
+            .Where(u => u.owner == Player.Player2 && u.isIdentified)
             .ToList();
 
         if (movableUnits.Count == 0) return;
@@ -998,30 +999,37 @@ public class GameManager : MonoBehaviour
         if (validMoves.Count > 0)
         {
             Vector3Int dest = validMoves[UnityEngine.Random.Range(0, validMoves.Count)];
-            
-            // 이동 처리 (직접 레지스트리 업데이트)
-            DeregisterUnit(unitToMove.location);
+            Vector3Int originalLocation = unitToMove.location; // 1. 이동 전 원래 위치 저장
+
+            // 2. 원래 위치의 정찰 하이라이트 제거
+            if (TileEffectManager.Instance != null)
+            {
+                TileEffectManager.Instance.removePermanentlyHighlightedTile(originalLocation);
+            }
+
+            // 3. 유닛 레지스트리 정보 업데이트
+            DeregisterUnit(originalLocation);
             RegisterUnit(dest, unitToMove);
 
-            TileEffectManager.Instance.removePermanentlyHighlightedTile(unitToMove.location);
-
+            // 4. 유닛 인스턴스 정보 업데이트
             unitToMove.location = dest;
             unitToMove.transform.position = gameGrid.GetCellCenterWorld(dest);
 
-
-
             unitToMove.isRevealed = false;
             unitToMove.isIdentified = false; // 이동 시 위치가 발각됨
-            
-            // [매의 눈] 상태 체크: 이동 시 위치가 발각됨
+
+            // 5. [매의 눈] 상태 체크: 이동 시 위치가 새로 노출됨
             if (unitToMove.isTracking)
             {
                 unitToMove.isRevealed = true;
                 Debug.Log($"[AI Tracking] {unitToMove.sourceCardData.cardName}이(가) 이동하여 위치가 노출되었습니다!");
-                TileEffectManager.Instance.HighlightReconTile(dest);
+                if (TileEffectManager.Instance != null)
+                {
+                    TileEffectManager.Instance.HighlightReconTile(dest);
+                }
             }
 
-            Debug.Log($"[AI] {unitToMove.sourceCardData.cardName} 이동 -> {dest}");
+            Debug.Log($"[AI] {unitToMove.sourceCardData.cardName} 이동: {originalLocation} -> {dest}");
         }
     }
 

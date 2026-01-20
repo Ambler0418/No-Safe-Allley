@@ -1,13 +1,12 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro; // TextMeshPro를 사용하기 위해 추가
-using System.Linq; // Linq 사용을 위해 추가
+using System.Linq;
 
 public class UIManager : MonoBehaviour
 {
     [Header("Buttons")]
     public Button myTurnButton;
-    public Button enemyTurnButton;
     public Button enemyProfileButton; // 적 본체(프로필) 클릭용 버튼
 
     [Header("Button Texts")]
@@ -49,7 +48,6 @@ public class UIManager : MonoBehaviour
     {
         // 버튼 클릭 이벤트에 함수 연결
         if (myTurnButton != null) myTurnButton.onClick.AddListener(OnMyTurnButtonClicked);
-        if (enemyTurnButton != null) enemyTurnButton.onClick.AddListener(OnEnemyTurnButtonClicked);
         if (useSkillButton != null) useSkillButton.onClick.AddListener(OnUseSkillButtonClicked);
         if (useConditionalSkillButton != null) useConditionalSkillButton.onClick.AddListener(OnUseConditionalSkillButtonClicked);
         if (enemyProfileButton != null) enemyProfileButton.onClick.AddListener(OnEnemyProfileClicked);
@@ -89,12 +87,6 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // '상대 턴 종료' 버튼 클릭 시
-    private void OnEnemyTurnButtonClicked()
-    {
-        GameManager.Instance.OnEnemyTurnEnd();
-    }
-
     // '적 프로필' 버튼 클릭 시 (직격 공격 시도)
     private void OnEnemyProfileClicked()
     {
@@ -113,6 +105,7 @@ public class UIManager : MonoBehaviour
     // '스킬 사용' 버튼 클릭 시
     private void OnUseSkillButtonClicked()
     {
+        Debug.Log("[UI] Use Skill Button Clicked");
         HandleSkillClick(false);
     }
 
@@ -200,7 +193,7 @@ public class UIManager : MonoBehaviour
 
     private void UpdateTurnButtons(GameManager gm)
     {
-        if (myTurnButton == null || enemyTurnButton == null || myTurnButtonText == null) return;
+        if (myTurnButton == null || myTurnButtonText == null) return;
 
         // 현재 플레이어가 내가 아니거나, 상대 턴일 경우 '내 턴 진행' 버튼 비활성화
         if (gm.currentPlayer != GameManager.Player.Player1 || gm.currentPhase == GameManager.GamePhase.EnemyTurn)
@@ -211,9 +204,6 @@ public class UIManager : MonoBehaviour
         {
             myTurnButton.interactable = true;
         }
-
-        // 상대 턴일 때만 '상대 턴 종료' 버튼 활성화
-        enemyTurnButton.interactable = (gm.currentPhase == GameManager.GamePhase.EnemyTurn);
 
         // '내 턴 진행' 버튼의 텍스트 변경
         switch (gm.currentPhase)
