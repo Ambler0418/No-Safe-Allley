@@ -30,6 +30,7 @@ public class SkillEffect : ScriptableObject
     public AreaPattern areaPattern; // 이 스킬이 사용할 범위 패턴
     public List<ActionEffect> actionEffects; // 타겟(범위 내)에게 적용할 효과 목록
     public List<ActionEffect> casterEffects; // 시전자(본인)에게 적용할 효과 목록 (추가)
+    public GameObject projectilePrefab; // 스킬 사용 시 발사될 투사체 프리팹 (추가)
 
     // 실행 로직이 이제는 오케스트레이터 역할을 합니다.
     public bool Execute(UnitInstance caster, Vector3Int primaryTarget)

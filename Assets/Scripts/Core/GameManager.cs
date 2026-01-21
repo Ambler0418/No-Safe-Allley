@@ -697,12 +697,6 @@ public class GameManager : MonoBehaviour
         skillCaster = null;
         currentSkillToUse = null; // 스킬 참조 해제
         
-        // 스킬 모드 종료 시 붉은색 잔상(임시 타일) 제거
-        if (TileEffectManager.Instance != null)
-        {
-            TileEffectManager.Instance.ClearTemporaryTiles();
-        }
-        
         Debug.Log("스킬 대상 지정 모드 종료.");
     }
 
@@ -1227,5 +1221,32 @@ public class GameManager : MonoBehaviour
         }
 
         return unitInstance;
+    }
+
+    /// <summary>
+    /// 투사체 프리팹을 생성하고 초기화합니다.
+    /// </summary>
+    /// <param name="startPos">투사체의 시작 월드 위치</param>
+    /// <param name="endPos">투사체의 목표 월드 위치</param>
+    /// <param name="prefab">생성할 투사체 프리팹</param>
+    public void SpawnProjectile(Vector3 startPos, Vector3 endPos, GameObject prefab)
+    {
+        if (prefab == null)
+        {
+            Debug.LogWarning("투사체 프리팹이 할당되지 않았습니다.");
+            return;
+        }
+
+        GameObject projectileObj = Instantiate(prefab, startPos, Quaternion.identity);
+        Projectile projectile = projectileObj.GetComponent<Projectile>();
+        if (projectile != null)
+        {
+            projectile.Initialize(endPos);
+        }
+        else
+        {
+            Debug.LogError($"투사체 프리팹 {prefab.name}에 Projectile 스크립트가 없습니다.");
+            Destroy(projectileObj); // 스크립트가 없으면 바로 파괴
+        }
     }
 }

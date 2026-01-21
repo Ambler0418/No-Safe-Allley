@@ -8,13 +8,18 @@ public class TileEffectManager : MonoBehaviour
     public static TileEffectManager Instance { get; private set; }
 
     [Header("Tilemaps")]
-    public Tilemap effectTilemap; // 타일 효과를 표시할 별도의 타일맵
+    public Tilemap effectTilemap; // 이동/공격 범위 등 임시 효과를 표시할 타일맵
+    public Tilemap objectTilemap; // 안개, 유닛 상태 표시 등 영구적인 오브젝트를 표시할 타일맵
 
     [Header("Effect Tiles")]
-    public Tile reconHighlightTile;
-    
-    public Tile assaultHighlightTile; // 정찰 효과에 사용할 붉은색 타일 애셋
-    public Tile moveHighlightTile;  // 이동 가능 범위 표시에 사용할 타일 애셋
+    public Tile reconHighlightTile; // 정찰 완료 하이라이트
+    public Tile assaultHighlightTile; // 공격 가능 하이라이트
+    public Tile moveHighlightTile;  // 이동 가능 범위 하이라이트
+
+    [Header("Object & Fog Tiles")]
+    public Tile fogTile; // 전장의 안개 타일 (흐릿한 효과)
+    public Tile hiddenIndicatorTile; // 아군 숨김 상태 표시 타일
+    public Tile exposedIndicatorTile; // 아군 노출 상태 표시 타일
 
     [Header("Effect Prefabs")]
     [SerializeField] private GameObject selectionHighlightPrefab; // 선택 하이라이트 효과 프리팹
@@ -37,35 +42,112 @@ public class TileEffectManager : MonoBehaviour
         {
             Instance = this;
         }
-        grid = FindObjectOfType<Grid>(); // 씬에서 Grid 오브젝트를 찾아 참조
+        grid = FindObjectOfType<Grid>();
+    }
+
+    // --- 새로운 Fog of War 및 상태 표시 메서드 ---
+
+    /// <summary>
+    /// 적군 영역에 전장의 안개를 초기화합니다.
+    /// </summary>
+    public void InitializeFogOfWar()
+    {
+        if (fogTile == null || objectTilemap == null || PlacementManager.Instance == null)
+        {
+            Debug.LogWarning("Fog of War 초기화에 필요한 컴포넌트가 없습니다 (fogTile, objectTilemap, PlacementManager).");
+            return;
+        }
+
+        objectTilemap.ClearAllTiles(); // 시작 시 오브젝트 타일맵 초기화
+        Tilemap enemyTerritory = PlacementManager.Instance.enemyTilemap;
+
+        foreach (var pos in enemyTerritory.cellBounds.allPositionsWithin)
+        {
+            if (enemyTerritory.HasTile(pos))
+            {
+                objectTilemap.SetTile(pos, fogTile);
+            }
+        }
     }
 
     /// <summary>
-    /// 지정된 타일 위치에 선택 하이라이트 효과를 표시합니다.
+    /// 지정된 위치의 안개를 제거합니다.
     /// </summary>
+    public void ClearFog(Vector3Int position)
+    {
+        if (objectTilemap != null && objectTilemap.GetTile(position) == fogTile)
+        {
+            objectTilemap.SetTile(position, null);
+        }
+    }
+    
+    /// <summary>
+    /// 모든 아군 유닛의 노출/숨김 상태 표시를 업데이트합니다.
+    /// </summary>
+    public void UpdateUnitStatusIndicators()
+    {
+        if (objectTilemap == null || hiddenIndicatorTile == null || exposedIndicatorTile == null)
+        {
+             Debug.LogWarning("유닛 상태 표시기에 필요한 타일이 할당되지 않았습니다.");
+             return;
+        }
+
+        // 1. 기존의 모든 상태 표시기 타일을 먼저 지웁니다.
+        //    (안개 타일은 건드리지 않기 위해 특정 타일만 순회하며 지웁니다)
+        List<Vector3Int> tilesToRemove = new List<Vector3Int>();
+        foreach (var pos in objectTilemap.cellBounds.allPositionsWithin)
+        {
+            TileBase tile = objectTilemap.GetTile(pos);
+            if (tile == hiddenIndicatorTile || tile == exposedIndicatorTile)
+            {
+                tilesToRemove.Add(pos);
+            }
+        }
+        foreach(var pos in tilesToRemove)
+        {
+            objectTilemap.SetTile(pos, null);
+        }
+
+
+        // 2. GameManager의 유닛 레지스트리를 기반으로 새 표시기를 설정합니다.
+        if (GameManager.Instance == null) return;
+
+        foreach (var unit in GameManager.Instance.unitRegistry.Values)
+        {
+            if (unit.owner == GameManager.Player.Player1) // 아군 유닛만
+            {
+                Tile toPlace = unit.isRevealed ? exposedIndicatorTile : hiddenIndicatorTile;
+                objectTilemap.SetTile(unit.location, toPlace);
+            }
+        }
+    }
+
+
+    // --- 기존 하이라이트 및 이펙트 메서드 (단순화) ---
+
+    public void AddMoveHighlight(Vector3Int cell)
+    {
+        effectTilemap.SetTile(cell, moveHighlightTile);
+    }
+
+    public void RemoveMoveHighlight(Vector3Int cell)
+    {
+        if (effectTilemap.GetTile(cell) == moveHighlightTile)
+        {
+            effectTilemap.SetTile(cell, null);
+        }
+    }
+    
     public void ShowSelectionHighlight(Vector3Int cell)
     {
-        // 다른 하이라이트가 있다면 먼저 숨김
         HideSelectionHighlight();
-
         if (selectionHighlightPrefab != null && grid != null)
         {
-            // 타일 셀의 중앙 월드 좌표를 계산
             Vector3 worldPos = grid.GetCellCenterWorld(cell);
-
-            // 프리팹을 인스턴스화하고 위치 설정
             currentSelectionHighlight = Instantiate(selectionHighlightPrefab, worldPos, Quaternion.identity);
-        }
-        else
-        {
-            if(selectionHighlightPrefab == null) Debug.LogWarning("Selection Highlight Prefab이 할당되지 않았습니다!");
-            if(grid == null) Debug.LogWarning("Grid를 찾을 수 없습니다!");
         }
     }
 
-    /// <summary>
-    /// 현재 표시되고 있는 선택 하이라이트 효과를 숨깁니다.
-    /// </summary>
     public void HideSelectionHighlight()
     {
         if (currentSelectionHighlight != null)
@@ -74,11 +156,6 @@ public class TileEffectManager : MonoBehaviour
             currentSelectionHighlight = null;
         }
     }
-
-    /// <summary>
-    /// 지정된 위치에 정찰 하이라이트 타일을 표시하고 영구 목록에 추가합니다.
-    /// 아군 유닛의 위치인 경우 영구 마킹을 생략합니다.
-    /// </summary>
     
     public void removePermanentlyHighlightedTile(Vector3Int targetCell)
     {
@@ -94,13 +171,8 @@ public class TileEffectManager : MonoBehaviour
 
     public void HighlightReconTile(Vector3Int targetCell)
     {
-        if (reconHighlightTile == null)
-        {
-            Debug.LogError("Recon Highlight Tile이 할당되지 않았습니다!");
-            return;
-        }
+        if (reconHighlightTile == null) return;
 
-        // 아군 유닛(Player1)의 위치인 경우 영구 마킹을 하지 않음 (사용자 요청)
         if (GameManager.Instance != null)
         {
             UnitInstance unit = GameManager.Instance.GetUnitAt(targetCell);
@@ -110,19 +182,15 @@ public class TileEffectManager : MonoBehaviour
             }
         }
 
-        permanentlyHighlightedTiles.Add(targetCell); // 목록에 추가
+        permanentlyHighlightedTiles.Add(targetCell);
         effectTilemap.SetTile(targetCell, reconHighlightTile);
     }
 
-    /// <summary>
-    /// 지정된 위치의 정찰 하이라이트를 제거합니다.
-    /// </summary>
     public void RemoveReconHighlight(Vector3Int targetCell)
     {
         if (permanentlyHighlightedTiles.Contains(targetCell))
         {
             permanentlyHighlightedTiles.Remove(targetCell);
-            // 해당 위치의 타일이 reconHighlightTile일 경우에만 지움
             if (effectTilemap.GetTile(targetCell) == reconHighlightTile)
             {
                 effectTilemap.SetTile(targetCell, null);
@@ -130,21 +198,13 @@ public class TileEffectManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 타일을 잠시 동안 하이라이트하고 지웁니다. (빈 땅 정찰 연출용)
-    /// </summary>
     public void FlashReconTile(Vector3Int targetCell, float duration = 0.5f)
     {
         StartCoroutine(FlashRoutine(targetCell, duration));
     }
 
-    /// <summary>
-    /// 영구 하이라이트된 타일이 아니라면 해당 위치의 효과를 지웁니다.
-    /// (UI 호버링 해제 등으로 인해 게임 로직상 중요한 표시가 지워지는 것을 방지)
-    /// </summary>
     public void ClearEffectTileSafe(Vector3Int cell)
     {
-        // 영구 하이라이트도 아니고, Flash 중인 타일도 아닐 때만 지움
         if (!permanentlyHighlightedTiles.Contains(cell) && !flashingTiles.Contains(cell))
         {
             effectTilemap.SetTile(cell, null);
@@ -153,21 +213,16 @@ public class TileEffectManager : MonoBehaviour
 
     private System.Collections.IEnumerator FlashRoutine(Vector3Int cell, float duration)
     {
-        // 아군 또는 적군 타일맵 범위 밖의 칸은 무시
         if (PlacementManager.Instance != null)
         {
-            bool isAllyTile = PlacementManager.Instance.allyTilemap.HasTile(cell);
-            bool isEnemyTile = PlacementManager.Instance.enemyTilemap.HasTile(cell);
-
-            if (!isAllyTile && !isEnemyTile)
+            if (!PlacementManager.Instance.allyTilemap.HasTile(cell) && !PlacementManager.Instance.enemyTilemap.HasTile(cell))
             {
-                yield break; // 유효한 타일이 아니면 루틴 즉시 종료
+                yield break;
             }
         }
 
         flashingTiles.Add(cell);
 
-        // Flash는 영구 목록에 추가하지 않고 타일만 설정
         if (reconHighlightTile != null)
         {
             effectTilemap.SetTile(cell, reconHighlightTile);
@@ -175,31 +230,21 @@ public class TileEffectManager : MonoBehaviour
 
         yield return new WaitForSeconds(duration);
         
-        // Flash 종료: 보호 목록에서 제거
         flashingTiles.Remove(cell);
 
-        // 영구 하이라이트 목록에 없는 경우에만 지움
         if (!permanentlyHighlightedTiles.Contains(cell))
         {
-            TileBase current = effectTilemap.GetTile(cell);
-            if (current == reconHighlightTile)
+            if (effectTilemap.GetTile(cell) == reconHighlightTile)
             {
                 effectTilemap.SetTile(cell, null);
             }
         }
     }
 
-    /// <summary>
-    /// 영구 하이라이트된 타일을 제외한 모든 임시 효과(호버링, 스킬 범위 등)를 지웁니다.
-    /// 스킬 모드 종료 시 호출하여 붉은색 잔상을 제거합니다.
-    /// </summary>
     public void ClearTemporaryTiles()
     {
-        // 타일맵의 모든 위치를 순회하며 영구 목록에 없는 타일만 제거
-        // (성능상 비효율적일 수 있으나, 맵 크기가 작다면 허용 범위)
         foreach (var pos in effectTilemap.cellBounds.allPositionsWithin)
         {
-            // Flash 중인 타일도 지우지 않음
             if (effectTilemap.HasTile(pos) && !permanentlyHighlightedTiles.Contains(pos) && !flashingTiles.Contains(pos))
             {
                 effectTilemap.SetTile(pos, null);
@@ -207,13 +252,11 @@ public class TileEffectManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 이펙트 타일맵의 모든 타일을 지웁니다.
-    /// </summary>
     public void ClearAllEffectTiles()
     {
         permanentlyHighlightedTiles.Clear();
-        flashingTiles.Clear(); // Flash 목록도 초기화
+        flashingTiles.Clear();
         effectTilemap.ClearAllTiles();
     }
 }
+

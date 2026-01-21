@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.EventSystems;
 using System.Security; // UI 클릭 감지를 위해 추가
+using System.Collections.Generic;
 
 public class TileClickManager : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class TileClickManager : MonoBehaviour
     private Vector3Int lastHoveredTile;
     private bool isMoveHoverTileSet = false;
     private bool isSkillHoverTileSet = false;
+    private List<Vector3Int> lastHighlightedAoe = new List<Vector3Int>(); // 스킬 범위 하이라이트 타일 추적
 
     void Update()
     {
@@ -20,20 +22,6 @@ public class TileClickManager : MonoBehaviour
 
         var gm = GameManager.Instance;
         var tem = TileEffectManager.Instance;
-
-        // --- 안전 장치: 모드가 종료되었는데 호버 플래그가 남아있다면 정리 ---
-        // GameManager가 모드를 종료할 때 ClearTemporaryTiles를 호출하지만, 
-        // 타이밍 문제나 예외 상황을 대비해 여기서도 확실하게 정리합니다.
-        if (!gm.isMovingUnit && isMoveHoverTileSet)
-        {
-            tem.ClearTemporaryTiles(); // 안전하게 모든 임시 타일 제거
-            isMoveHoverTileSet = false;
-        }
-        if (!gm.isTargetingSkill && isSkillHoverTileSet)
-        {
-            tem.ClearTemporaryTiles(); // 안전하게 모든 임시 타일 제거
-            isSkillHoverTileSet = false;
-        }
 
         // --- 유닛 이동 로직 ---
         if (gm.isMovingUnit)
@@ -53,14 +41,14 @@ public class TileClickManager : MonoBehaviour
             {
                 if (isMoveHoverTileSet)
                 {
-                    tem.ClearEffectTileSafe(lastHoveredTile);
+                    tem.RemoveMoveHighlight(lastHoveredTile);
                     isMoveHoverTileSet = false;
                 }
 
                 bool isValid = gm.GetUnitAt(currentHoverTile) == null && allyTilemap.HasTile(currentHoverTile);
                 if (isValid)
                 {
-                    tem.effectTilemap.SetTile(currentHoverTile, tem.moveHighlightTile);
+                    tem.AddMoveHighlight(currentHoverTile);
                     isMoveHoverTileSet = true;
                 }
                 lastHoveredTile = currentHoverTile;
@@ -101,7 +89,7 @@ public class TileClickManager : MonoBehaviour
         {
             if (isMoveHoverTileSet)
             {
-                tem.ClearEffectTileSafe(lastHoveredTile);
+                tem.RemoveMoveHighlight(lastHoveredTile);
                 isMoveHoverTileSet = false;
             }
         }
@@ -116,15 +104,18 @@ public class TileClickManager : MonoBehaviour
 
             if (currentHoverTile != lastHoveredTile)
             {
-                if (isSkillHoverTileSet)
+                // 이전 하이라이트 제거
+                foreach (var tile in lastHighlightedAoe)
                 {
-                    tem.ClearEffectTileSafe(lastHoveredTile);
-                    isSkillHoverTileSet = false;
+                    tem.ClearEffectTileSafe(tile);
                 }
-                
-                SkillEffect skillToUse = gm.currentSkillToUse; // gm.skillCaster?.ActiveSkill 대신 사용
-                if (skillToUse != null)
+                lastHighlightedAoe.Clear();
+                isSkillHoverTileSet = false;
+
+                SkillEffect skillToUse = gm.currentSkillToUse;
+                if (skillToUse != null && skillToUse.areaPattern != null)
                 {
+                    // 마우스 위치가 유효한 타겟 타입의 타일인지 먼저 확인
                     bool isValidHover = false;
                     if (skillToUse.targetType == SkillTargetType.Ally)
                     {
@@ -137,7 +128,27 @@ public class TileClickManager : MonoBehaviour
 
                     if (isValidHover)
                     {
-                        tem.effectTilemap.SetTile(currentHoverTile, tem.moveHighlightTile); 
+                        // 유효하다면, 스킬의 AreaPattern에 따라 전체 범위 계산
+                        lastHighlightedAoe = skillToUse.areaPattern.GetAffectedTiles(currentHoverTile);
+                        
+                        // 계산된 모든 타일에 하이라이트 적용
+                        foreach (var tile in lastHighlightedAoe)
+                        {
+                            bool shouldHighlight = false;
+                            if (skillToUse.targetType == SkillTargetType.Ally)
+                            {
+                                shouldHighlight = allyTilemap.HasTile(tile);
+                            }
+                            else if (skillToUse.targetType == SkillTargetType.Enemy)
+                            {
+                                shouldHighlight = enemyTilemap.HasTile(tile);
+                            }
+
+                            if (shouldHighlight)
+                            {
+                                tem.AddMoveHighlight(tile);
+                            }
+                        }
                         isSkillHoverTileSet = true;
                     }
                 }
@@ -147,6 +158,13 @@ public class TileClickManager : MonoBehaviour
             // 클릭 로직
             if (Input.GetMouseButtonDown(1))
             {
+                foreach (var tile in lastHighlightedAoe)
+                {
+                    tem.ClearEffectTileSafe(tile);
+                }
+                lastHighlightedAoe.Clear();
+                isSkillHoverTileSet = false;
+
                 gm.ExitSkillTargetingMode();
                 return; 
             }
@@ -227,6 +245,14 @@ public class TileClickManager : MonoBehaviour
                         int finalCost = caster.GetSkillCost(skillToUse);
                         if (gm.HasEnoughEnergy(finalCost))
                         {
+                            // 💥 투사체 발사 💥
+                            if (skillToUse.projectilePrefab != null)
+                            {
+                                Vector3 startPos = caster.transform.position;
+                                Vector3 endPos = gameGrid.GetCellCenterWorld(currentHoverTile);
+                                gm.SpawnProjectile(startPos, endPos, skillToUse.projectilePrefab);
+                            }
+
                             // 실제 스킬 로직을 실행하고 그 결과(성공 여부)를 받습니다.
                             if (skillToUse.Execute(caster, currentHoverTile))
                             {
@@ -243,7 +269,11 @@ public class TileClickManager : MonoBehaviour
                         }
                         
                         // 성공/실패 여부와 상관없이 타겟팅 모드는 종료합니다.
-                        // (실패했다면 다시 버튼을 눌러 진입할 수 있습니다.)
+                        foreach (var tile in lastHighlightedAoe)
+                        {
+                            tem.ClearEffectTileSafe(tile);
+                        }
+                        lastHighlightedAoe.Clear();
                         isSkillHoverTileSet = false; 
                         gm.ExitSkillTargetingMode();
                     }
@@ -251,7 +281,12 @@ public class TileClickManager : MonoBehaviour
                     {
                         // 잘못된 대상을 클릭하면 즉시 취소
                         Debug.Log("유효하지 않은 대상입니다. 스킬 사용이 취소됩니다.");
-                        isSkillHoverTileSet = false; // 호버 플래그 해제 (잔상 방지 보조)
+                        foreach (var tile in lastHighlightedAoe)
+                        {
+                            tem.ClearEffectTileSafe(tile);
+                        }
+                        lastHighlightedAoe.Clear();
+                        isSkillHoverTileSet = false;
                         gm.ExitSkillTargetingMode();
                     }
                 }
